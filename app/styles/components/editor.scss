@@ -3,42 +3,34 @@
   --cm-textColor: var(--bolt-elements-editor-textColor, var(--bolt-elements-textPrimary));
 
   /* Gutter */
-
   --cm-gutter-backgroundColor: var(--bolt-elements-editor-gutter-backgroundColor, var(--cm-backgroundColor));
   --cm-gutter-textColor: var(--bolt-elements-editor-gutter-textColor, var(--bolt-elements-textSecondary));
   --cm-gutter-activeLineTextColor: var(--bolt-elements-editor-gutter-activeLineTextColor, var(--cm-gutter-textColor));
 
   /* Fold Gutter */
-
   --cm-foldGutter-textColor: var(--bolt-elements-editor-foldGutter-textColor, var(--cm-gutter-textColor));
   --cm-foldGutter-textColorHover: var(--bolt-elements-editor-foldGutter-textColorHover, var(--cm-gutter-textColor));
 
   /* Active Line */
-
   --cm-activeLineBackgroundColor: var(--bolt-elements-editor-activeLineBackgroundColor, rgb(224 231 235 / 30%));
 
   /* Cursor */
-
   --cm-cursor-width: 2px;
   --cm-cursor-backgroundColor: var(--bolt-elements-editor-cursorColor, var(--bolt-elements-textSecondary));
 
   /* Matching Brackets */
-
   --cm-matching-bracket: var(--bolt-elements-editor-matchingBracketBackgroundColor, rgb(50 140 130 / 0.3));
 
   /* Selection */
-
   --cm-selection-backgroundColorFocused: var(--bolt-elements-editor-selection-backgroundColor, #42b4ff);
   --cm-selection-backgroundOpacityFocused: var(--bolt-elements-editor-selection-backgroundOpacity, 0.3);
   --cm-selection-backgroundColorBlured: var(--bolt-elements-editor-selection-inactiveBackgroundColor, #c9e9ff);
   --cm-selection-backgroundOpacityBlured: var(--bolt-elements-editor-selection-inactiveBackgroundOpacity, 0.3);
 
   /* Panels */
-
   --cm-panels-borderColor: var(--bolt-elements-editor-panels-borderColor, var(--bolt-elements-borderColor));
 
   /* Search */
-
   --cm-search-backgroundColor: var(--bolt-elements-editor-search-backgroundColor, var(--cm-backgroundColor));
   --cm-search-textColor: var(--bolt-elements-editor-search-textColor, var(--bolt-elements-textSecondary));
   --cm-search-closeButton-backgroundColor: var(--bolt-elements-editor-search-closeButton-backgroundColor, transparent);
@@ -93,7 +85,6 @@
   );
 
   /* Tooltip */
-
   --cm-tooltip-backgroundColor: var(--bolt-elements-editor-tooltip-backgroundColor, var(--cm-backgroundColor));
   --cm-tooltip-textColor: var(--bolt-elements-editor-tooltip-textColor, var(--bolt-elements-textPrimary));
 
@@ -113,7 +104,7 @@
 }
 
 html[data-theme='light'] {
-  --bolt-elements-editor-gutter-textColor: #237893;
+  --bolt-elements-editor-gutter-textColor: #9b59b6; /* Violet clair pour le texte du gutter */
   --bolt-elements-editor-gutter-activeLineTextColor: var(--bolt-elements-textPrimary);
   --bolt-elements-editor-foldGutter-textColorHover: var(--bolt-elements-textPrimary);
   --bolt-elements-editor-activeLineBackgroundColor: rgb(50 53 63 / 5%);
@@ -123,13 +114,13 @@ html[data-theme='light'] {
 }
 
 html[data-theme='dark'] {
-  --cm-backgroundColor: var(--bolt-elements-bg-depth-2);
-  --bolt-elements-editor-gutter-textColor: var(--bolt-elements-textTertiary);
-  --bolt-elements-editor-gutter-activeLineTextColor: var(--bolt-elements-textSecondary);
+  --cm-backgroundColor: var(--bolt-elements-bg-depth-2); /* Arrière-plan violet foncé pour le dark theme */
+  --bolt-elements-editor-gutter-textColor: var(--bolt-elements-textTertiary); /* Texte plus clair */
+  --bolt-elements-editor-gutter-activeLineTextColor: var(--bolt-elements-textSecondary); /* Texte violet clair */
   --bolt-elements-editor-selection-inactiveBackgroundOpacity: 0.3;
   --bolt-elements-editor-activeLineBackgroundColor: rgb(50 53 63 / 50%);
   --bolt-elements-editor-foldGutter-textColorHover: var(--bolt-elements-textPrimary);
   --bolt-elements-editor-matchingBracketBackgroundColor: rgba(66, 180, 255, 0.3);
-  --bolt-elements-editor-search-button-backgroundColor: theme('colors.gray.800');
+  --bolt-elements-editor-search-button-backgroundColor: theme('colors.gray.800'); /* Violet pour le fond du bouton */
   --bolt-elements-editor-search-button-backgroundColorHover: theme('colors.alpha.white.10');
 }
