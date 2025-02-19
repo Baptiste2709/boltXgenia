@@ -130,7 +130,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                       minHeight: TEXTAREA_MIN_HEIGHT,
                       maxHeight: TEXTAREA_MAX_HEIGHT,
                     }}
-                    placeholder="Comment Genia peux vous aider ?"
+                    placeholder="Comment Genia peut vous aider ?"
                     translate="no"
                   />
                   <ClientOnly>
