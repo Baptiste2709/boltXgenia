@@ -1,4 +1,5 @@
 /* Color Tokens Light Theme */
+
 :root,
 :root[data-theme='light'] {
   --bolt-elements-borderColor: #9b59b6; /* Violet clair */
@@ -94,4 +95,44 @@
   --bolt-elements-artifacts-borderColor: #8e44ad; /* Violet foncé pour les bordures */
   --bolt-elements-artifacts-inlineCode-background: #7b3f8e; /* Violet foncé pour le code */
   --bolt-elements-artifacts-inlineCode-text: #ffffff; /* Texte blanc pour le code */
+}
+
+/*
+ * Element Tokens
+ *
+ * Hierarchy: Element Token -> (Element Token | Color Tokens) -> Primitives
+ */
+:root {
+  --header-height: 54px;
+  --chat-max-width: 37rem;
+  --chat-min-width: 640px;
+  --workbench-width: min(calc(100% - var(--chat-min-width)), 1536px);
+  --workbench-inner-width: var(--workbench-width);
+  --workbench-left: calc(100% - var(--workbench-width));
+
+  /* Toasts */
+  --toastify-color-progress-success: var(--bolt-elements-icon-success);
+  --toastify-color-progress-error: var(--bolt-elements-icon-error);
+
+  /* Terminal */
+  --bolt-elements-terminal-backgroundColor: var(--bolt-terminal-background);
+  --bolt-elements-terminal-textColor: var(--bolt-terminal-foreground);
+  --bolt-elements-terminal-cursorColor: var(--bolt-terminal-foreground);
+  --bolt-elements-terminal-selection-backgroundColor: var(--bolt-terminal-selection-background);
+  --bolt-elements-terminal-color-black: var(--bolt-terminal-black);
+  --bolt-elements-terminal-color-red: var(--bolt-terminal-red);
+  --bolt-elements-terminal-color-green: var(--bolt-terminal-green);
+  --bolt-elements-terminal-color-yellow: var(--bolt-terminal-yellow);
+  --bolt-elements-terminal-color-blue: var(--bolt-terminal-blue);
+  --bolt-elements-terminal-color-magenta: var(--bolt-terminal-magenta);
+  --bolt-elements-terminal-color-cyan: var(--bolt-terminal-cyan);
+  --bolt-elements-terminal-color-white: var(--bolt-terminal-white);
+  --bolt-elements-terminal-color-brightBlack: var(--bolt-terminal-brightBlack);
+  --bolt-elements-terminal-color-brightRed: var(--bolt-terminal-brightRed);
+  --bolt-elements-terminal-color-brightGreen: var(--bolt-terminal-brightGreen);
+  --bolt-elements-terminal-color-brightYellow: var(--bolt-terminal-brightYellow);
+  --bolt-elements-terminal-color-brightBlue: var(--bolt-terminal-brightBlue);
+  --bolt-elements-terminal-color-brightMagenta: var(--bolt-terminal-brightMagenta);
+  --bolt-elements-terminal-color-brightCyan: var(--bolt-terminal-brightCyan);
+  --bolt-elements-terminal-color-brightWhite: var(--bolt-terminal-brightWhite);
 }
