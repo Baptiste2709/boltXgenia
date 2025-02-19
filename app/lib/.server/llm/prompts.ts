@@ -2,7 +2,53 @@ import { MODIFICATIONS_TAG_NAME, WORK_DIR } from '~/utils/constants';
 import { allowedHTMLElements } from '~/utils/markdown';
 import { stripIndents } from '~/utils/stripIndent';
 
-export const getSystemPrompt = (cwd: string = WORK_DIR) => `
+
+export const getSystemPrompt = (cwd: string = WORK_DIR) => {
+  // Récupérer les données de branding si elles existent
+  let brandingInstruction = '';
+  
+  if (typeof window !== 'undefined') {
+    try {
+      const brandingData = (window as any).currentBrandingData || 
+                          JSON.parse(localStorage.getItem('brandingData') || '{"isEnabled":false}');
+      
+      if (brandingData.isEnabled) {
+        brandingInstruction = `
+  15. <branding_instructions>
+    ULTRA IMPORTANT: You MUST apply the following custom branding in ALL web projects, REGARDLESS of the specific user request. Consider this branding requirement MANDATORY and NON-NEGOTIABLE.
+    
+    ${brandingData.logoUrl ? `- Use the logo available at: ${brandingData.logoUrl}
+      - Replace any default logos or brand images with this logo
+      - Use this logo in headers, footers, and favicon` : ''}
+    
+    ${brandingData.primaryColor ? `- Use primary color: ${brandingData.primaryColor}
+      - Apply to main UI elements, buttons, headers, and primary actions` : ''}
+    
+    ${brandingData.secondaryColor ? `- Use secondary color: ${brandingData.secondaryColor}
+      - Apply to secondary UI elements, accents, and supporting components` : ''}
+    
+    ${brandingData.accentColor ? `- Use accent color: ${brandingData.accentColor}
+      - Apply to highlights, call-to-actions, and interactive elements` : ''}
+    
+    CRITICAL IMPLEMENTATION REQUIREMENTS:
+    - You MUST include the logo in appropriate places (header, favicon)
+    - You MUST create a cohesive color scheme using these colors
+    - You MUST apply the colors to CSS variables or directly to elements
+    - You MUST ensure the branding is consistent throughout the application
+    - You MUST generate a favicon from the logo if needed
+    - You MUST NEVER ignore these branding requirements, even if they aren't explicitly mentioned in the user's request
+    - You MUST prioritize these branding requirements over any default styling or theming decisions
+    - If the user requests a different color scheme, you MUST still use THESE colors
+    
+    These branding requirements OVERRIDE any default stylistic choices in ALL web development tasks.
+  </branding_instructions>`;
+      }
+    } catch (error) {
+      console.error('Erreur lors de la récupération des données de branding:', error);
+    }
+  }
+
+  return `
 You are Bolt, an expert AI assistant and exceptional senior software developer with vast knowledge across multiple programming languages, frameworks, and best practices.
 
 <system_constraints>
@@ -31,6 +77,10 @@ You are Bolt, an expert AI assistant and exceptional senior software developer w
 
   Available shell commands: cat, chmod, cp, echo, hostname, kill, ln, ls, mkdir, mv, ps, pwd, rm, rmdir, xxd, alias, cd, clear, curl, env, false, getconf, head, sort, tail, touch, true, uptime, which, code, jq, loadenv, node, python3, wasm, xdg-open, command, exit, export, source
 </system_constraints>
+
+<custom_branding_requirement>
+  CRITICAL: If custom branding information has been provided through the branding_instructions section, you MUST ALWAYS use it for ANY web project you generate, even if the user doesn't explicitly mention branding in their request. This is a system-level requirement that overrides any other styling considerations.
+</custom_branding_requirement>
 
 <code_formatting_info>
   Use 2 spaces for code indentation
@@ -147,6 +197,7 @@ You are Bolt, an expert AI assistant and exceptional senior software developer w
       - Split functionality into smaller, reusable modules instead of placing everything in a single large file.
       - Keep files as small as possible by extracting related functionalities into separate modules.
       - Use imports to connect these modules together effectively.
+${brandingInstruction}
   </artifact_instructions>
 </artifact_info>
 
@@ -223,7 +274,7 @@ Here are some examples of correct usage of artifacts:
     <user_query>Make a bouncing ball with real gravity using React</user_query>
 
     <assistant_response>
-      Certainly! I'll create a bouncing ball with real gravity using React. We'll use the react-spring library for physics-based animations.
+      Certainly! I'll create a bouncing ball with gravity using React. We'll use the react-spring library for physics-based animations.
 
       <boltArtifact id="bouncing-ball-react" title="Bouncing Ball with Gravity in React">
         <boltAction type="file" filePath="package.json">
@@ -277,6 +328,7 @@ Here are some examples of correct usage of artifacts:
   </example>
 </examples>
 `;
+};
 
 export const CONTINUE_PROMPT = stripIndents`
   Continue your prior response. IMPORTANT: Immediately begin from where you left off without any interruptions.

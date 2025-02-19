@@ -10,6 +10,13 @@ import { SendButton } from './SendButton.client';
 
 import styles from './BaseChat.module.scss';
 
+interface BrandingData {
+  isEnabled: boolean;
+  logoUrl: string | null;
+  primaryColor: string;
+  secondaryColor: string;
+  accentColor: string;
+}
 
 interface BaseChatProps {
   textareaRef?: React.RefObject<HTMLTextAreaElement> | undefined;
@@ -60,6 +67,11 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
     },
     ref,
   ) => {
+    // Récupérer les données de branding depuis le stockage
+const brandingData = typeof window !== 'undefined' ? 
+((window as any).currentBrandingData || 
+ JSON.parse(localStorage.getItem('brandingData') || '{"isEnabled":false}'))
+: { isEnabled: false };
     const TEXTAREA_MAX_HEIGHT = chatStarted ? 400 : 200;
     const toggleCustomBranding = (event: React.ChangeEvent<HTMLInputElement>) => {
       const isChecked = event.target.checked;
@@ -364,15 +376,77 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
             
             {/* Bouton d'application des changements */}
             <div className="flex justify-end">
-              <button 
-                className="px-4 py-2 bg-bolt-elements-item-contentAccent text-white rounded-md text-sm hover:bg-opacity-90 transition-colors"
-                onClick={() => {
-                  // Logique pour appliquer les changements
-                  alert('Charte graphique appliquée !');
-                }}
-              >
-                Appliquer les changements
-              </button>
+            <button 
+  className="px-4 py-2 bg-bolt-elements-item-contentAccent text-white rounded-md text-sm hover:bg-opacity-90 transition-colors"
+  onClick={() => {
+    // Récupérer les valeurs actuelles du formulaire
+    const logoPreview = document.getElementById('logo-preview') as HTMLImageElement;
+    const primaryColorInput = document.querySelector('input[type="color"][defaultValue="#3B82F6"]') as HTMLInputElement;
+    const secondaryColorInput = document.querySelector('input[type="color"][defaultValue="#10B981"]') as HTMLInputElement;
+    const accentColorInput = document.querySelector('input[type="color"][defaultValue="#F59E0B"]') as HTMLInputElement;
+    
+    // Construire l'objet BrandingData
+    const brandingData: BrandingData = {
+      isEnabled: true,
+      logoUrl: logoPreview && !logoPreview.classList.contains('hidden') ? logoPreview.src : null,
+      primaryColor: primaryColorInput ? primaryColorInput.value : '#3B82F6',
+      secondaryColor: secondaryColorInput ? secondaryColorInput.value : '#10B981',
+      accentColor: accentColorInput ? accentColorInput.value : '#F59E0B'
+    };
+    
+    // Stocker dans localStorage pour persistance
+    localStorage.setItem('brandingData', JSON.stringify(brandingData));
+    
+    // Stocker dans une variable globale window si nécessaire
+    (window as any).currentBrandingData = brandingData;
+    
+    // Afficher les valeurs dans la console
+    console.log('Charte graphique mise à jour:', brandingData);
+    
+    // Créer un élément de débogage pour afficher les valeurs
+    const debugInfo = document.createElement('div');
+    debugInfo.style.position = 'fixed';
+    debugInfo.style.top = '20px';
+    debugInfo.style.right = '20px';
+    debugInfo.style.backgroundColor = 'rgba(0,0,0,0.8)';
+    debugInfo.style.color = 'white';
+    debugInfo.style.padding = '20px';
+    debugInfo.style.borderRadius = '5px';
+    debugInfo.style.zIndex = '9999';
+    debugInfo.style.maxWidth = '400px';
+    debugInfo.style.overflowWrap = 'break-word';
+    
+    // Formater le contenu
+    debugInfo.innerHTML = `
+      <h3 style="margin-top:0;color:#F59E0B">Données de branding enregistrées:</h3>
+      <p><strong>État:</strong> ${brandingData.isEnabled ? 'Activé' : 'Désactivé'}</p>
+      <p><strong>Couleur principale:</strong> <span style="display:inline-block;width:15px;height:15px;background:${brandingData.primaryColor};border:1px solid #fff;"></span> ${brandingData.primaryColor}</p>
+      <p><strong>Couleur secondaire:</strong> <span style="display:inline-block;width:15px;height:15px;background:${brandingData.secondaryColor};border:1px solid #fff;"></span> ${brandingData.secondaryColor}</p>
+      <p><strong>Couleur d'accent:</strong> <span style="display:inline-block;width:15px;height:15px;background:${brandingData.accentColor};border:1px solid #fff;"></span> ${brandingData.accentColor}</p>
+      ${brandingData.logoUrl ? `<p><strong>Logo:</strong> <img src="${brandingData.logoUrl}" style="max-width:100%;max-height:100px;display:block;margin-top:10px;" /></p>` : '<p><strong>Logo:</strong> Aucun</p>'}
+      <button style="background:#3B82F6;border:none;color:white;padding:5px 10px;border-radius:3px;margin-top:10px;cursor:pointer" onclick="this.parentNode.remove()">Fermer</button>
+    `;
+    
+    // Ajouter l'élément à la page
+    document.body.appendChild(debugInfo);
+    
+    // Configurer la suppression automatique après 10 secondes
+    setTimeout(() => {
+      if (document.body.contains(debugInfo)) {
+        debugInfo.remove();
+      }
+    }, 10000);
+    
+    // Afficher l'alerte standard
+    alert('Charte graphique appliquée !');
+    
+    // Si vous avez besoin d'accéder à ces données ailleurs
+    const event = new CustomEvent('brandingUpdated', { detail: brandingData });
+    document.dispatchEvent(event);
+  }}
+>
+  Appliquer les changements
+</button>
             </div>
           </div>
         </div>
