@@ -1,5 +1,5 @@
 import type { Message } from 'ai';
-import React, { useState, type RefCallback, useRef} from 'react';
+import React, { useState, type RefCallback, useRef, useEffect } from 'react';
 import { ClientOnly } from 'remix-utils/client-only';
 import { Menu } from '~/components/sidebar/Menu.client';
 import { IconButton } from '~/components/ui/IconButton';
@@ -89,6 +89,28 @@ const brandingData = typeof window !== 'undefined' ?
       updateBranding({ isCustomBranding: isChecked });
       event.target.closest('label')?.setAttribute('data-custom-branding', String(isChecked));
     };
+    
+    // Utiliser useEffect pour gérer le scroll quand le formulaire s'ouvre/se ferme
+    useEffect(() => {
+      if (showBrandingForm) {
+        // Permettre le scroll et se positionner sur l'input
+        const mainContainer = document.querySelector('.' + styles.BaseChat) as HTMLElement;
+        if (mainContainer) {
+          mainContainer.style.overflow = 'auto';
+          
+          // Scroll to input
+          if (textareaRef?.current) {
+            textareaRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
+        }
+      } else {
+        // Réinitialiser
+        const mainContainer = document.querySelector('.' + styles.BaseChat) as HTMLElement;
+        if (mainContainer) {
+          mainContainer.style.overflow = '';
+        }
+      }
+    }, [showBrandingForm]);6
 
     const handleColorChange = (type: 'primary' | 'secondary' | 'accent', value: string, isInput: boolean) => {
       if (isInput) {
@@ -174,12 +196,21 @@ const brandingData = typeof window !== 'undefined' ?
         ref={ref}
         className={classNames(
           styles.BaseChat,
-          'relative flex h-full w-full overflow-hidden bg-bolt-elements-background-depth-1',
+          'relative flex h-full w-full bg-bolt-elements-background-depth-1',
+          showBrandingForm ? 'overflow-auto' : 'overflow-hidden'
         )}
         data-chat-visible={showChat}
       >
         <ClientOnly>{() => <Menu />}</ClientOnly>
-        <div ref={scrollRef} className="flex overflow-y-auto w-full h-full">
+        <div 
+          ref={scrollRef} 
+          className="flex w-full h-full overflow-y-auto" 
+          style={{ 
+            maxHeight: '100vh',
+            position: showBrandingForm ? 'relative' : 'static',
+            overflowY: 'auto'
+          }}
+        >
           <div className={classNames(styles.Chat, 'flex flex-col flex-grow min-w-[var(--chat-min-width)] h-full')}>
             {/* Contenu principal conteneur */}
             <div className="flex flex-col items-center justify-center w-full h-full">
@@ -212,7 +243,7 @@ const brandingData = typeof window !== 'undefined' ?
               </div>
               
               {/* Zone de saisie et fonctionnalités */}
-              <div className="w-full max-w-chat mx-auto z-prompt pb-4">
+              <div className="w-full max-w-chat mx-auto z-prompt pb-4 sticky top-0 bg-bolt-elements-background-depth-1" id="input-container">
                 {/* Textarea principal */}
                 <div className="shadow-sm border border-bolt-elements-borderColor bg-bolt-elements-prompt-background backdrop-filter backdrop-blur-[8px] rounded-lg overflow-hidden">
                   <textarea
@@ -286,7 +317,7 @@ const brandingData = typeof window !== 'undefined' ?
                 </div>
                 
                 {/* Toggle pour importer sa propre charte graphique */}
-                <div className="flex items-center pl-4 mt-2 mb-2">
+                <div className="flex items-center pl-4 mt-2 mb-2" id="toggle-container">
                   <label className="relative inline-flex items-center cursor-pointer" data-custom-branding="false">
                     <input 
                       type="checkbox" 
@@ -301,7 +332,7 @@ const brandingData = typeof window !== 'undefined' ?
                 
                 {/* Formulaire de charte graphique */}
                 {showBrandingForm && (
-                  <div className="flex flex-col space-y-4 px-4 py-3 mx-4 mb-4 rounded-lg bg-bolt-elements-background-depth-2 border border-bolt-elements-borderColor transition-all duration-300">
+                  <div className="flex flex-col space-y-4 px-4 py-3 mx-4 mb-4 rounded-lg bg-bolt-elements-background-depth-2 border border-bolt-elements-borderColor transition-all duration-300" id="branding-form">
                     {/* Zone de drop pour le logo */}
                     <div className="flex flex-col">
                       <label className="text-sm text-bolt-elements-textSecondary mb-1">Logo de votre entreprise</label>
@@ -380,7 +411,7 @@ const brandingData = typeof window !== 'undefined' ?
                       </div>
                     </div>
 
-                    {/* Couleur tertiaire */}
+                    {/* Couleur tertiaire */}5
                     <div className="flex flex-col">
                       <label className="text-sm text-bolt-elements-textSecondary mb-1">Couleur d'accent</label>
                       <div className="flex items-center">
