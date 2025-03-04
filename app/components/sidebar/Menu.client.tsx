@@ -9,6 +9,7 @@ import { cubicEasingFn } from '~/utils/easings';
 import { logger } from '~/utils/logger';
 import { HistoryItem } from './HistoryItem';
 import { binDates } from './date-binning';
+import { BrandInfoSidebar } from '~/components/chat/BrandInfoSideBar.client';
 
 const menuVariants = {
   closed: {
@@ -109,6 +110,9 @@ export function Menu() {
     >
       <div className="flex items-center h-[var(--header-height)]">{/* Placeholder */}</div>
       <div className="flex-1 flex flex-col h-full w-full overflow-hidden">
+      <div className="menu-container">
+      <BrandInfoSidebar />
+      </div>
         <div className="p-4">
           <a
             href="/"

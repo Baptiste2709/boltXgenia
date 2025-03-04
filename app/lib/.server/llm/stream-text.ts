@@ -4,7 +4,14 @@ import { getAnthropicModel } from '~/lib/.server/llm/model';
 import { MAX_TOKENS } from './constants';
 import { getSystemPrompt } from './prompts';
 
-interface ToolResult<Name extends string, Args, Result> {
+interface ToolInvocation {
+  toolCallId: string;
+  toolName: string;
+  args: unknown;
+  state: "result"; // Ensure this property exists
+}
+
+interface ToolResult<Name extends string, Args, Result> extends ToolInvocation {
   toolCallId: string;
   toolName: Name;
   args: Args;
