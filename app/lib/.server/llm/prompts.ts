@@ -3,9 +3,60 @@ import { allowedHTMLElements } from '~/utils/markdown';
 import { stripIndents } from '~/utils/stripIndent';
 import type { BrandingInfo } from '~/components/chat/BrandContext';
 
+<<<<<<< HEAD
 // Function to format the brand context into a string for the prompt
 function formatBrandContext(branding: BrandingInfo | null): string {
   if (!branding) return '';
+=======
+
+export const getSystemPrompt = (cwd: string = WORK_DIR) => {
+  // Récupérer les données de branding si elles existent
+  let brandingInstruction = '';
+  
+  if (typeof window !== 'undefined') {
+    try {
+      const brandingData = (window as any).currentBrandingData || 
+                          JSON.parse(localStorage.getItem('brandingData') || '{"isEnabled":false}');
+      
+      if (brandingData.isEnabled) {
+        brandingInstruction = `
+  15. <branding_instructions>
+    ULTRA IMPORTANT: You MUST apply the following custom branding in ALL web projects, REGARDLESS of the specific user request. Consider this branding requirement MANDATORY and NON-NEGOTIABLE.
+    
+    ${brandingData.logoUrl ? `- Use the logo available at: ${brandingData.logoUrl}
+      - Replace any default logos or brand images with this logo
+      - Use this logo in headers, footers, and favicon` : ''}
+    
+    ${brandingData.primaryColor ? `- Use primary color: ${brandingData.primaryColor}
+      - Apply to main UI elements, buttons, headers, and primary actions` : ''}
+    
+    ${brandingData.secondaryColor ? `- Use secondary color: ${brandingData.secondaryColor}
+      - Apply to secondary UI elements, accents, and supporting components` : ''}
+    
+    ${brandingData.accentColor ? `- Use accent color: ${brandingData.accentColor}
+      - Apply to highlights, call-to-actions, and interactive elements` : ''}
+    
+    CRITICAL IMPLEMENTATION REQUIREMENTS:
+    - You MUST include the logo in appropriate places (header, favicon)
+    - You MUST create a cohesive color scheme using these colors
+    - You MUST apply the colors to CSS variables or directly to elements
+    - You MUST ensure the branding is consistent throughout the application
+    - You MUST generate a favicon from the logo if needed
+    - You MUST NEVER ignore these branding requirements, even if they aren't explicitly mentioned in the user's request
+    - You MUST prioritize these branding requirements over any default styling or theming decisions
+    - If the user requests a different color scheme, you MUST still use THESE colors
+    
+    These branding requirements OVERRIDE any default stylistic choices in ALL web development tasks.
+  </branding_instructions>`;
+      }
+    } catch (error) {
+      console.error('Erreur lors de la récupération des données de branding:', error);
+    }
+  }
+
+  return `
+You are Bolt, an expert AI assistant and exceptional senior software developer with vast knowledge across multiple programming languages, frameworks, and best practices.
+>>>>>>> 83a302b90d0af48362da19e10552f50f452e0fcf
 
   return `
   COLOR PALETTE:
@@ -60,6 +111,10 @@ export const getSystemPrompt = (cwd: string = WORK_DIR, branding: BrandingInfo |
 
   Available shell commands: cat, chmod, cp, echo, hostname, kill, ln, ls, mkdir, mv, ps, pwd, rm, rmdir, xxd, alias, cd, clear, curl, env, false, getconf, head, sort, tail, touch, true, uptime, which, code, jq, loadenv, node, python3, wasm, xdg-open, command, exit, export, source
 </system_constraints>
+
+<custom_branding_requirement>
+  CRITICAL: If custom branding information has been provided through the branding_instructions section, you MUST ALWAYS use it for ANY web project you generate, even if the user doesn't explicitly mention branding in their request. This is a system-level requirement that overrides any other styling considerations.
+</custom_branding_requirement>
 
 <code_formatting_info>
   Use 2 spaces for code indentation
@@ -192,6 +247,7 @@ Failure to apply these rules is **not acceptable**. All output **must** follow t
       - Split functionality into smaller, reusable modules instead of placing everything in a single large file.
       - Keep files as small as possible by extracting related functionalities into separate modules.
       - Use imports to connect these modules together effectively.
+<<<<<<< HEAD
       
     15. ULTRA IMPORTANT: For all websites and UIs generated, you MUST apply the brand style guide provided in the <brand_style_guide> section. This includes using:
       - The exact brand colors for all UI elements
@@ -199,6 +255,9 @@ Failure to apply these rules is **not acceptable**. All output **must** follow t
       - The correct spacing and layout parameters
       - Any brand-specific design patterns mentioned
       If no brand style guide is provided, use clean, modern design principles with a focus on usability.
+=======
+${brandingInstruction}
+>>>>>>> 83a302b90d0af48362da19e10552f50f452e0fcf
   </artifact_instructions>
 </artifact_info>
 
@@ -421,8 +480,13 @@ Here are some examples of correct usage of artifacts:
       You can now view the bouncing ball animation in the preview. The ball will start falling from the top of the screen and bounce realistically when it hits the bottom.
     </assistant_response>
   </example>
+<<<<<<< HEAD
 </examples>`
 ;
+=======
+</examples>
+`;
+>>>>>>> 83a302b90d0af48362da19e10552f50f452e0fcf
 };
 
 export const CONTINUE_PROMPT = stripIndents`
