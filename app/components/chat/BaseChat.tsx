@@ -11,6 +11,18 @@ import { useBranding } from '~/components/chat/BrandContext';
 
 import styles from './BaseChat.module.scss';
 
+// Déclarer l'API fs pour TypeScript
+declare global {
+  interface Window {
+    fs?: {
+      mkdir: (path: string) => Promise<void>;
+      writeFile: (path: string, data: Uint8Array) => Promise<void>;
+      stat: (path: string) => Promise<any>;
+    };
+    systemPrompt?: string;
+  }
+}
+
 interface BrandingData {
   isEnabled: boolean;
   logoUrl: string | null;
@@ -94,9 +106,16 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
       if (showBrandingForm && branding.logo) {
         // Si le formulaire est ouvert et qu'un logo existe dans branding, l'afficher
         const imgPreview = document.getElementById('logo-preview') as HTMLImageElement;
+        const uploadText = document.getElementById('logo-upload-text');
+        
         if (imgPreview) {
           imgPreview.src = branding.logo;
           imgPreview.classList.remove('hidden');
+          
+          // Masquer le texte quand logo présent
+          if (uploadText) {
+            uploadText.classList.add('hidden');
+          }
         }
       }
     }, [showBrandingForm, branding.logo]);
@@ -159,22 +178,78 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
           const reader = new FileReader();
           reader.onload = (event) => {
             const imgPreview = document.getElementById('logo-preview') as HTMLImageElement;
+            const uploadText = document.getElementById('logo-upload-text');
+            
             if (imgPreview && event.target?.result) {
               imgPreview.src = event.target.result as string;
               imgPreview.classList.remove('hidden');
+              
+              // Masquer le texte quand logo présent
+              if (uploadText) {
+                uploadText.classList.add('hidden');
+              }
             }
           };
           reader.readAsDataURL(file);
         }
       }
+
+    
     };
 
-    // Modifiez la fonction applyBrandingChanges pour mieux gérer le logo
-    const applyBrandingChanges = () => {
+    const applyBrandingChanges = async () => {
       const logoPreview = document.getElementById('logo-preview') as HTMLImageElement;
-      // Vérifiez si le logo est visible (pas hidden) avant d'utiliser sa source
-      const logoSrc = logoPreview && !logoPreview.classList.contains('hidden') ? logoPreview.src : null;
-
+      // Vérifier si le logo est visible avant d'utiliser sa source
+      let logoSrc = null;
+      
+      if (logoPreview && !logoPreview.classList.contains('hidden')) {
+        try {
+          // Générer un nom unique pour le logo
+          const timestamp = new Date().getTime();
+          const logoFilename = `logo_${timestamp}.png`;
+          const logoPath = `charte_logos/${logoFilename}`;
+          
+          // Utiliser l'API WebContainers (window.fs) si disponible
+          if (window.fs) {
+            try {
+              // Convertir le data URL en Blob puis en ArrayBuffer
+              const response = await fetch(logoPreview.src);
+              const blob = await response.blob();
+              const arrayBuffer = await blob.arrayBuffer();
+              const uint8Array = new Uint8Array(arrayBuffer);
+              
+              // Créer le dossier s'il n'existe pas
+              try {
+                await window.fs.mkdir('charte_logos');
+              } catch (err: any) {  // Utiliser any ici pour éviter l'erreur
+                // Ignorer l'erreur si le dossier existe déjà
+                if (err.code !== 'EEXIST') {
+                  throw err;
+                }
+              }
+              
+              // Écrire le fichier
+              await window.fs.writeFile(logoPath, uint8Array);
+              
+              console.log(`Logo sauvegardé avec succès dans ${logoPath}`);
+              logoSrc = logoPath;
+            } catch (fsError) {
+              console.error('Erreur lors de l\'opération sur le système de fichiers:', fsError);
+              // Fallback : utiliser le data URL directement
+              logoSrc = logoPreview.src;
+            }
+          } else {
+            // Fallback pour les navigateurs sans API fs
+            console.warn('API système de fichiers non disponible, utilisation du data URL');
+            logoSrc = logoPreview.src;
+          }
+        } catch (error) {
+          console.error('Erreur lors du traitement du logo:', error);
+          // Fallback : utiliser le data URL directement
+          logoSrc = logoPreview.src;
+        }
+      }
+    
       const newBranding = {
         logo: logoSrc,
         primaryColor: primaryColorInputRef.current?.value || branding.primaryColor,
@@ -183,13 +258,15 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
         fontFamily: fontFamilyRef.current?.value || branding.fontFamily,
         isCustomBranding: true
       };
-
+    
       updateBranding(newBranding);
-
-      // Afficher une confirmation et fermer le formulaire après application
+      
+      // Ajouter une instruction dans le prompt système pour l'IA
+      if (window.systemPrompt && logoSrc) {
+        window.systemPrompt += `\nIMPORTANT: Un logo est disponible à l'emplacement ${logoSrc}. Veuillez l'inclure dans tous les projets générés.`;
+      }
+      
       alert('Charte graphique appliquée !');
-      // Optionnel : fermer le formulaire après application
-      // setShowBrandingForm(false);
     };
 
     return (
@@ -341,7 +418,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
 
                       {/* Zone de drop pour le logo */}
                       <div className="flex flex-col">
-                        <label className="text-sm text-bolt-elements-textSecondary mb-1">Logo de votre entreprise</label>
+                        <label className="text-sm text-bolt-elements-textSecondary mb-1">Logo</label>
                         <div
                           className="h-24 flex items-center justify-center border-2 border-dashed border-bolt-elements-borderColor rounded-md bg-bolt-elements-background-depth-1 transition-colors duration-150 cursor-pointer"
                           onDragOver={handleDragOver}
@@ -359,9 +436,16 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                                 const reader = new FileReader();
                                 reader.onload = (event) => {
                                   const imgPreview = document.getElementById('logo-preview') as HTMLImageElement;
+                                  const uploadText = document.getElementById('logo-upload-text');
+                                  
                                   if (imgPreview && event.target?.result) {
                                     imgPreview.src = event.target.result as string;
                                     imgPreview.classList.remove('hidden');
+                                    
+                                    // Masquer le texte quand logo présent
+                                    if (uploadText) {
+                                      uploadText.classList.add('hidden');
+                                    }
                                   }
                                 };
                                 reader.readAsDataURL(e.target.files[0]);
@@ -370,7 +454,9 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                           />
                           <div className="flex flex-col items-center">
                             <img id="logo-preview" src="" alt="Logo preview" className="hidden max-h-20 mb-2" />
-                            <div className="text-sm text-bolt-elements-textTertiary">Glissez-déposez votre logo ou cliquez pour sélectionner</div>
+                            <div className="text-sm text-bolt-elements-textTertiary" id="logo-upload-text">
+                              Glissez-déposez votre logo ou cliquez pour sélectionner
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -456,6 +542,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                           <option value="playfair">Playfair Display</option>
                           <option value="sourcecode">Source Code Pro</option>
                           <option value="merriweather">Merriweather</option>
+                          <option value="spacegrotesk">Space Grotesk</option>
                         </select>
                       </div>
 

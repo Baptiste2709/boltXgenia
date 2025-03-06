@@ -16,7 +16,10 @@ function formatBrandContext(branding: BrandingInfo | null): string {
   TYPOGRAPHY:
   - Font Family: ${branding.fontFamily}
   
-  ${branding.logo ? `LOGO: Available at ${branding.logo}` : 'LOGO: Not provided'}
+  LOGO:
+  ${branding.logo ? 
+  `- Le logo est disponible dans le chemin "${branding.logo}". Assurez-vous de copier ce fichier dans le projet généré et de l'utiliser avec le chemin relatif approprié.` :
+  '- Logo: Not provided'}
   
   DESIGN PRINCIPLES:
   - Use the primary color for main UI elements, buttons, and headings
