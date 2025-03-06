@@ -12,6 +12,7 @@ import { fileModificationsToHTML } from '~/utils/diff';
 import { cubicEasingFn } from '~/utils/easings';
 import { createScopedLogger, renderLogger } from '~/utils/logger';
 import { BaseChat } from './BaseChat';
+import { useBranding } from '~/components/chat/BrandContext';
 
 const toastAnimation = cssTransition({
   enter: 'animated fadeInRight',
@@ -72,6 +73,7 @@ export const ChatImpl = memo(({ initialMessages, storeMessageHistory }: ChatProp
   const [chatStarted, setChatStarted] = useState(initialMessages.length > 0);
 
   const { showChat } = useStore(chatStore);
+  const { branding } = useBranding();
 
   const [animationScope, animate] = useAnimate();
 
@@ -146,6 +148,35 @@ export const ChatImpl = memo(({ initialMessages, storeMessageHistory }: ChatProp
     setChatStarted(true);
   };
 
+  // Fonction pour créer un message avec les instructions de la charte graphique
+  const createMessageWithBranding = (_input: string) => {
+    if (branding.isCustomBranding) {
+      // Instructions pour l'IA concernant la charte graphique
+      const brandingInstructions = `
+<branding_instructions>
+Utilise la charte graphique suivante pour tous les éléments visuels que tu crées:
+- Couleur principale: ${branding.primaryColor}
+- Couleur secondaire: ${branding.secondaryColor}
+- Couleur d'accent: ${branding.accentColor}
+- Police de caractères: ${branding.fontFamily}
+${branding.logo ? '- Un logo est également fourni et doit être utilisé' : ''}
+
+Ces couleurs doivent être utilisées de manière cohérente dans tout le contenu que tu génères:
+- La couleur principale pour les éléments dominants (en-têtes, boutons principaux)
+- La couleur secondaire pour les éléments de support (sous-titres, liens)
+- La couleur d'accent pour les mises en évidence (boutons d'appel à l'action, notifications)
+
+Si tu génères du code HTML/CSS/JS, assure-toi d'intégrer ces couleurs et cette police.
+</branding_instructions>
+
+${_input}`;
+
+      return brandingInstructions;
+    }
+    
+    return _input;
+  };
+
   const sendMessage = async (_event: React.UIEvent, messageInput?: string) => {
     const _input = messageInput || input;
 
@@ -168,6 +199,9 @@ export const ChatImpl = memo(({ initialMessages, storeMessageHistory }: ChatProp
 
     runAnimation();
 
+    // Création du message avec les instructions de branding si nécessaire
+    const messageWithBranding = createMessageWithBranding(_input);
+
     if (fileModifications !== undefined) {
       const diff = fileModificationsToHTML(fileModifications);
 
@@ -178,7 +212,12 @@ export const ChatImpl = memo(({ initialMessages, storeMessageHistory }: ChatProp
        * manually reset the input and we'd have to manually pass in file attachments. However, those
        * aren't relevant here.
        */
-      append({ role: 'user', content: `${diff}\n\n${_input}` });
+      append({ 
+        role: 'user', 
+        content: `${diff}\n\n${messageWithBranding}`,
+        // Pour l'affichage, nous utilisons le message original sans les instructions de branding
+        display: `${diff}\n\n${_input}`
+      });
 
       /**
        * After sending a new message we reset all modifications since the model
@@ -186,7 +225,12 @@ export const ChatImpl = memo(({ initialMessages, storeMessageHistory }: ChatProp
        */
       workbenchStore.resetAllFileModifications();
     } else {
-      append({ role: 'user', content: _input });
+      append({ 
+        role: 'user', 
+        content: messageWithBranding,
+        // Pour l'affichage, nous utilisons le message original sans les instructions de branding
+        display: _input 
+      });
     }
 
     setInput('');
@@ -215,7 +259,11 @@ export const ChatImpl = memo(({ initialMessages, storeMessageHistory }: ChatProp
       handleStop={abort}
       messages={messages.map((message, i) => {
         if (message.role === 'user') {
-          return message;
+          // Utiliser la propriété 'display' si elle existe, sinon utiliser le contenu normal
+          return {
+            ...message,
+            content: message.display || message.content
+          };
         }
 
         return {
