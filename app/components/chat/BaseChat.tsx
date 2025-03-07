@@ -8,6 +8,7 @@ import { classNames } from '~/utils/classNames';
 import { Messages } from './Messages.client';
 import { SendButton } from './SendButton.client';
 import { useBranding } from '~/components/chat/BrandContext';
+import { toast } from 'react-toastify';
 
 import styles from './BaseChat.module.scss';
 
@@ -197,77 +198,27 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
     
     };
 
-    const applyBrandingChanges = async () => {
-      const logoPreview = document.getElementById('logo-preview') as HTMLImageElement;
-      // Vérifier si le logo est visible avant d'utiliser sa source
-      let logoSrc = null;
-      
-      if (logoPreview && !logoPreview.classList.contains('hidden')) {
-        try {
-          // Générer un nom unique pour le logo
-          const timestamp = new Date().getTime();
-          const logoFilename = `logo_${timestamp}.png`;
-          const logoPath = `charte_logos/${logoFilename}`;
-          
-          // Utiliser l'API WebContainers (window.fs) si disponible
-          if (window.fs) {
-            try {
-              // Convertir le data URL en Blob puis en ArrayBuffer
-              const response = await fetch(logoPreview.src);
-              const blob = await response.blob();
-              const arrayBuffer = await blob.arrayBuffer();
-              const uint8Array = new Uint8Array(arrayBuffer);
-              
-              // Créer le dossier s'il n'existe pas
-              try {
-                await window.fs.mkdir('charte_logos');
-              } catch (err: any) {  // Utiliser any ici pour éviter l'erreur
-                // Ignorer l'erreur si le dossier existe déjà
-                if (err.code !== 'EEXIST') {
-                  throw err;
-                }
-              }
-              
-              // Écrire le fichier
-              await window.fs.writeFile(logoPath, uint8Array);
-              
-              console.log(`Logo sauvegardé avec succès dans ${logoPath}`);
-              logoSrc = logoPath;
-            } catch (fsError) {
-              console.error('Erreur lors de l\'opération sur le système de fichiers:', fsError);
-              // Fallback : utiliser le data URL directement
-              logoSrc = logoPreview.src;
-            }
-          } else {
-            // Fallback pour les navigateurs sans API fs
-            console.warn('API système de fichiers non disponible, utilisation du data URL');
-            logoSrc = logoPreview.src;
-          }
-        } catch (error) {
-          console.error('Erreur lors du traitement du logo:', error);
-          // Fallback : utiliser le data URL directement
-          logoSrc = logoPreview.src;
-        }
-      }
-    
-      const newBranding = {
-        logo: logoSrc,
-        primaryColor: primaryColorInputRef.current?.value || branding.primaryColor,
-        secondaryColor: secondaryColorInputRef.current?.value || branding.secondaryColor,
-        accentColor: accentColorInputRef.current?.value || branding.accentColor,
-        fontFamily: fontFamilyRef.current?.value || branding.fontFamily,
-        isCustomBranding: true
-      };
-    
-      updateBranding(newBranding);
-      
-      // Ajouter une instruction dans le prompt système pour l'IA
-      if (window.systemPrompt && logoSrc) {
-        window.systemPrompt += `\nIMPORTANT: Un logo est disponible à l'emplacement ${logoSrc}. Veuillez l'inclure dans tous les projets générés.`;
-      }
-      
-      alert('Charte graphique appliquée !');
-    };
+    const applyBrandingChanges = () => {
+  const logoPreview = document.getElementById('logo-preview') as HTMLImageElement;
+  // Vérifiez si le logo est visible (pas hidden) avant d'utiliser sa source
+  const logoSrc = logoPreview && !logoPreview.classList.contains('hidden') ? logoPreview.src : null;
+
+  const newBranding = {
+    logo: logoSrc,
+    primaryColor: primaryColorInputRef.current?.value || branding.primaryColor,
+    secondaryColor: secondaryColorInputRef.current?.value || branding.secondaryColor,
+    accentColor: accentColorInputRef.current?.value || branding.accentColor,
+    fontFamily: fontFamilyRef.current?.value || branding.fontFamily,
+    isCustomBranding: true
+  };
+
+  updateBranding(newBranding);
+
+  // Afficher une confirmation et fermer le formulaire après application
+  alert('Charte graphique appliquée !');
+  // Optionnel : fermer le formulaire après application
+  // setShowBrandingForm(false);
+};
 
     return (
       <div

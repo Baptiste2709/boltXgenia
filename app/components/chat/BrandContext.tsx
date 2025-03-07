@@ -3,6 +3,7 @@ import React, { createContext, useContext, useState, type ReactNode, useEffect }
 // Interface pour les informations de la charte graphique
 export interface BrandingInfo {
   logo: string | null;
+  savedPath?: string | null; // Chemin où le logo a été sauvegardé dans le projet
   primaryColor: string;
   secondaryColor: string;
   accentColor: string;
@@ -13,6 +14,7 @@ export interface BrandingInfo {
 // Valeurs par défaut
 const defaultBranding: BrandingInfo = {
   logo: null,
+  savedPath: null,
   primaryColor: '#3B82F6',
   secondaryColor: '#10B981',
   accentColor: '#F59E0B',

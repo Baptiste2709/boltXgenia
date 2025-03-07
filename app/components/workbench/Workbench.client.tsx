@@ -1,3 +1,4 @@
+// app/components/workbench/Workbench.client.tsx
 import { useStore } from '@nanostores/react';
 import { motion, type HTMLMotionProps, type Variants } from 'framer-motion';
 import { computed } from 'nanostores';
@@ -16,6 +17,7 @@ import { cubicEasingFn } from '~/utils/easings';
 import { renderLogger } from '~/utils/logger';
 import { EditorPanel } from './EditorPanel';
 import { Preview } from './Preview';
+import { DownloadButton } from './DownloadButton';
 
 interface WorkspaceProps {
   chatStarted?: boolean;
@@ -120,7 +122,10 @@ export const Workbench = memo(({ chatStarted, isStreaming }: WorkspaceProps) => 
             <div className="h-full flex flex-col bg-bolt-elements-background-depth-2 border border-bolt-elements-borderColor shadow-sm rounded-lg overflow-hidden">
               <div className="flex items-center px-3 py-2 border-b border-bolt-elements-borderColor">
                 <Slider selected={selectedView} options={sliderOptions} setSelected={setSelectedView} />
-                <div className="ml-auto" />
+                
+                {/* Bouton de téléchargement ici, entre le slider et le toggle terminal */}
+                <DownloadButton className="ml-auto mr-2" />
+                
                 {selectedView === 'code' && (
                   <PanelHeaderButton
                     className="mr-1 text-sm"
