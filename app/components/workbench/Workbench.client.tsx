@@ -1,4 +1,4 @@
-// app/components/workbench/Workbench.client.tsx
+// app/components/workbench/Workbench.client.tsx - Version finale
 import { useStore } from '@nanostores/react';
 import { motion, type HTMLMotionProps, type Variants } from 'framer-motion';
 import { computed } from 'nanostores';
@@ -17,7 +17,7 @@ import { cubicEasingFn } from '~/utils/easings';
 import { renderLogger } from '~/utils/logger';
 import { EditorPanel } from './EditorPanel';
 import { Preview } from './Preview';
-import { DownloadButton } from './DownloadButton';
+import { ProjectActionsMenu } from './ProjectActionsMenu';
 
 interface WorkspaceProps {
   chatStarted?: boolean;
@@ -33,7 +33,7 @@ const sliderOptions: SliderOptions<WorkbenchViewType> = {
   },
   right: {
     value: 'preview',
-    text: 'Preview',
+    text: 'Prévisualisation',
   },
 };
 
@@ -123,20 +123,23 @@ export const Workbench = memo(({ chatStarted, isStreaming }: WorkspaceProps) => 
               <div className="flex items-center px-3 py-2 border-b border-bolt-elements-borderColor">
                 <Slider selected={selectedView} options={sliderOptions} setSelected={setSelectedView} />
                 
-                {/* Bouton de téléchargement ici, entre le slider et le toggle terminal */}
-                <DownloadButton className="ml-auto mr-2" />
+                {/* Menu d'actions de projet */}
+                <div className="flex items-center ml-auto">
+                  <ProjectActionsMenu className="mr-2" />
+                  
+                  {selectedView === 'code' && (
+                    <PanelHeaderButton
+                      className="mr-1 text-sm"
+                      onClick={() => {
+                        workbenchStore.toggleTerminal(!workbenchStore.showTerminal.get());
+                      }}
+                    >
+                      <div className="i-ph:terminal" />
+                      Terminal
+                    </PanelHeaderButton>
+                  )}
+                </div>
                 
-                {selectedView === 'code' && (
-                  <PanelHeaderButton
-                    className="mr-1 text-sm"
-                    onClick={() => {
-                      workbenchStore.toggleTerminal(!workbenchStore.showTerminal.get());
-                    }}
-                  >
-                    <div className="i-ph:terminal" />
-                    Toggle Terminal
-                  </PanelHeaderButton>
-                )}
                 <IconButton
                   icon="i-ph:x-circle"
                   className="-mr-1"

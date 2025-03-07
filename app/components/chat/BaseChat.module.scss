@@ -18,37 +18,30 @@
   opacity: 1;
 }
 
-/* Styles pour le formulaire de charte graphique */
+/* Styles pour réduire l'espace entre le titre et l'input */
 .brandingFormSidebar {
   transition: transform 0.3s ease-in-out;
   box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1);
-}
-
-.brandingFormContainer {
-  max-height: calc(100vh - 200px);
+  }
+  .brandingFormContainer {
+  max-height: calc(100vh - 150px); /* Réduit la hauteur max */
   overflow-y: auto;
   scrollbar-width: thin;
-}
-
-.brandingFormContainer::-webkit-scrollbar {
+  }
+  .brandingFormContainer::-webkit-scrollbar {
   width: 6px;
-}
-
-.brandingFormContainer::-webkit-scrollbar-track {
+  }
+  .brandingFormContainer::-webkit-scrollbar-track {
   background: var(--bolt-elements-background-depth-1);
-}
-
-.brandingFormContainer::-webkit-scrollbar-thumb {
+  }
+  .brandingFormContainer::-webkit-scrollbar-thumb {
   background: var(--bolt-elements-borderColor);
   border-radius: 3px;
-}
-
-.brandingFormContainer::-webkit-scrollbar-thumb:hover {
+  }
+  .brandingFormContainer::-webkit-scrollbar-thumb:hover {
   background: var(--bolt-elements-textTertiary);
-}
-
-/* Styles pour assurer que l'input reste toujours centré */
-.inputContainer {
+  }
+  .inputContainer {
   position: relative;
   z-index: 10;
-}
+  }

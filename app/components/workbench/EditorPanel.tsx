@@ -130,7 +130,7 @@ export const EditorPanel = memo(
               <div className="flex flex-col border-r border-bolt-elements-borderColor h-full">
                 <PanelHeader>
                   <div className="i-ph:tree-structure-duotone shrink-0" />
-                  Files
+                  Fichiers
                 </PanelHeader>
                 <FileTree
                   className="h-full"
@@ -147,17 +147,17 @@ export const EditorPanel = memo(
             <Panel className="flex flex-col" defaultSize={80} minSize={20}>
               <PanelHeader className="overflow-x-auto">
                 {activeFileSegments?.length && (
-                  <div className="flex items-center flex-1 text-sm">
+                  <div className="flex items-center flex-1 text-sm ">
                     <FileBreadcrumb pathSegments={activeFileSegments} files={files} onFileSelect={onFileSelect} />
                     {activeFileUnsaved && (
                       <div className="flex gap-1 ml-auto -mr-1.5">
                         <PanelHeaderButton onClick={onFileSave}>
                           <div className="i-ph:floppy-disk-duotone" />
-                          Save
+                          Enregistrer
                         </PanelHeaderButton>
                         <PanelHeaderButton onClick={onFileReset}>
                           <div className="i-ph:clock-counter-clockwise-duotone" />
-                          Reset
+                          Annuler
                         </PanelHeaderButton>
                       </div>
                     )}

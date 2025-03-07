@@ -1,51 +1,126 @@
 /* Color Tokens Light Theme */
 
+/* Color Tokens Light Theme */
 :root,
 :root[data-theme='light'] {
-  --bolt-elements-borderColor: #9b59b6; /* Violet clair */
-  --bolt-elements-borderColorActive: #8e44ad; /* Violet foncé */
+  /* Couleurs de base */
+  --bolt-elements-borderColor: #7d5ba6; /* Violet moyen */
+  --bolt-elements-borderColorActive: #6a1b9a; /* Violet foncé */
 
+  /* Arrière-plans */
+  --bolt-elements-bg-depth-1: #2b2a33; /* Gris foncé avec légère teinte violette */
+  --bolt-elements-bg-depth-2: #35334d; /* Gris-violet un peu plus clair */
+  --bolt-elements-bg-depth-3: #403a64; /* Violet modéré */
+  --bolt-elements-bg-depth-4: #4b3f7a; /* Violet un peu plus clair */
+
+  /* Textes */
+  --bolt-elements-textPrimary: #e8e8e8; /* Blanc cassé */
+  --bolt-elements-textSecondary: #c8a9e7; /* Lilas clair */
+  --bolt-elements-textTertiary: #a889d5; /* Lilas moyen */
+
+  /* Code */
+  --bolt-elements-code-background: #403a64; /* Violet modéré */
+  --bolt-elements-code-text: #e8e8e8; /* Blanc cassé */
+  
+  /* Boutons */
+  --bolt-elements-button-primary-background: #8e44ad; /* Violet pour bouton principal */
+  --bolt-elements-button-primary-backgroundHover: #7b3f8e; /* Plus foncé au survol */
+  --bolt-elements-button-primary-text: #ffffff; /* Texte blanc */
+
+  --bolt-elements-button-secondary-background: #4b3f7a; /* Violet modéré */
+  --bolt-elements-button-secondary-backgroundHover: #5a4d89; /* Violet plus clair au survol */
+  --bolt-elements-button-secondary-text: #e8e8e8; /* Texte blanc cassé */
+
+  --bolt-elements-button-danger-background: #964a5a; /* Rouge assombri */
+  --bolt-elements-button-danger-backgroundHover: #a55263; /* Rouge un peu plus clair au survol */
+  --bolt-elements-button-danger-text: #ffffff; /* Texte blanc */
+
+  /* Éléments d'interface */
+  --bolt-elements-item-contentDefault: #c8a9e7; /* Lilas clair */
+  --bolt-elements-item-contentActive: #ddc3f0; /* Lilas très clair */
+  --bolt-elements-item-contentAccent: #ddc3f0; /* Lilas très clair */
+  --bolt-elements-item-contentDanger: #e77385; /* Rouge-rose moyen */
+  
+  --bolt-elements-item-backgroundDefault: rgba(0, 0, 0, 0); /* Transparent */
+  --bolt-elements-item-backgroundActive: #4b3f7a; /* Violet modéré */
+  --bolt-elements-item-backgroundAccent: #5a4d89; /* Violet plus clair */
+  --bolt-elements-item-backgroundDanger: rgba(150, 74, 90, 0.3); /* Rouge transparent */
+
+  /* Loader */
+  --bolt-elements-loader-background: #403a64; /* Violet modéré */
+  --bolt-elements-loader-progress: #c8a9e7; /* Lilas clair */
+
+  /* Artefacts */
+  --bolt-elements-artifacts-background: #403a64; /* Violet modéré */
+  --bolt-elements-artifacts-backgroundHover: #4b3f7a; /* Violet un peu plus clair */
+  --bolt-elements-artifacts-borderColor: #7d5ba6; /* Violet moyen */
+  --bolt-elements-artifacts-inlineCode-background: #4b3f7a; /* Violet un peu plus clair */
+  --bolt-elements-artifacts-inlineCode-text: #e8e8e8; /* Blanc cassé */
+
+  /* Icônes */
+  --bolt-elements-icon-success: #70c088; /* Vert moyen */
+  --bolt-elements-icon-error: #e77385; /* Rouge-rose moyen */
+}
+
+/* Color Tokens Dark Theme */
+:root[data-theme='dark'] {
+  /* Couleurs de base */
+  --bolt-elements-borderColor: #9b59b6; /* Violet clair pour les bordures */
+  --bolt-elements-borderColorActive: #8e44ad; /* Violet foncé au survol */
+
+  /* Arrière-plans */
   --bolt-elements-bg-depth-1: #000000; /* Arrière-plan noir */
   --bolt-elements-bg-depth-2: #2c1b47; /* Violet foncé */
   --bolt-elements-bg-depth-3: #3e1f6d; /* Violet plus saturé */
   --bolt-elements-bg-depth-4: #6a1b9a; /* Violet doux */
 
+  /* Textes */
   --bolt-elements-textPrimary: #ffffff; /* Texte blanc pour contraster */
   --bolt-elements-textSecondary: #ab47bc; /* Violet clair pour le texte secondaire */
   --bolt-elements-textTertiary: #e1bee7; /* Violet très clair pour le texte tertiaire */
 
-  --bolt-elements-code-background: #7b3f8e; /* Violet foncé pour les blocs de code */
+  /* Code */
+  --bolt-elements-code-background: #3e1f6d; /* Violet foncé pour les blocs de code */
   --bolt-elements-code-text: #ffffff; /* Texte blanc pour le code */
-
-  --bolt-elements-button-primary-background: #8e44ad; /* Violet foncé pour le bouton principal */
-  --bolt-elements-button-primary-backgroundHover: #7b3f8e; /* Violet plus foncé au survol */
+  
+  /* Boutons */
+  --bolt-elements-button-primary-background: #9c27b0; /* Violet vif pour bouton principal */
+  --bolt-elements-button-primary-backgroundHover: #8e24aa; /* Plus foncé au survol */
   --bolt-elements-button-primary-text: #ffffff; /* Texte blanc */
 
-  --bolt-elements-button-secondary-background: #6a1b9a; /* Violet plus doux pour le bouton secondaire */
-  --bolt-elements-button-secondary-backgroundHover: #8e24aa; /* Violet plus clair au survol */
+  --bolt-elements-button-secondary-background: #6a1b9a; /* Violet moyen */
+  --bolt-elements-button-secondary-backgroundHover: #8e24aa; /* Plus clair au survol */
   --bolt-elements-button-secondary-text: #ffffff; /* Texte blanc */
 
-  --bolt-elements-button-danger-background: #f44336; /* Rouge pour les boutons de danger */
+  --bolt-elements-button-danger-background: #f44336; /* Rouge vif */
   --bolt-elements-button-danger-backgroundHover: #d32f2f; /* Rouge plus foncé */
   --bolt-elements-button-danger-text: #ffffff; /* Texte blanc */
 
-  --bolt-elements-item-contentDefault: #6a1b9a; /* Violet foncé */
-  --bolt-elements-item-contentActive: #9b59b6; /* Violet plus clair */
-  --bolt-elements-item-contentAccent: #ab47bc; /* Violet clair pour les accents */
-  --bolt-elements-item-contentDanger: #f44336; /* Rouge pour le danger */
-  --bolt-elements-item-backgroundDefault: rgba(0, 0, 0, 0); /* Transparent pour les éléments */
-  --bolt-elements-item-backgroundActive: #3e1f6d; /* Violet saturé pour l'élément actif */
-  --bolt-elements-item-backgroundAccent: #6a1b9a; /* Violet doux pour l'accent */
-  --bolt-elements-item-backgroundDanger: #ffebee; /* Fond clair pour les éléments en danger */
+  /* Éléments d'interface */
+  --bolt-elements-item-contentDefault: #ab47bc; /* Violet clair */
+  --bolt-elements-item-contentActive: #ce93d8; /* Violet plus clair */
+  --bolt-elements-item-contentAccent: #e1bee7; /* Violet très clair */
+  --bolt-elements-item-contentDanger: #f44336; /* Rouge vif */
+  
+  --bolt-elements-item-backgroundDefault: rgba(0, 0, 0, 0); /* Transparent */
+  --bolt-elements-item-backgroundActive: #3e1f6d; /* Fond actif violet foncé */
+  --bolt-elements-item-backgroundAccent: #6a1b9a; /* Fond accent violet moyen */
+  --bolt-elements-item-backgroundDanger: rgba(244, 67, 54, 0.2); /* Fond danger rouge transparent */
 
-  --bolt-elements-loader-background: #9c27b0; /* Violet pour le fond du loader */
-  --bolt-elements-loader-progress: #8e44ad; /* Violet foncé pour la progression du loader */
+  /* Loader */
+  --bolt-elements-loader-background: #3e1f6d; /* Fond loader violet foncé */
+  --bolt-elements-loader-progress: #ce93d8; /* Progrès violet clair */
 
+  /* Artefacts */
   --bolt-elements-artifacts-background: #4a148c; /* Violet saturé pour les artefacts */
   --bolt-elements-artifacts-backgroundHover: #6a1b9a; /* Violet clair au survol */
   --bolt-elements-artifacts-borderColor: #8e44ad; /* Violet foncé pour les bordures */
   --bolt-elements-artifacts-inlineCode-background: #7b3f8e; /* Violet foncé pour le code */
   --bolt-elements-artifacts-inlineCode-text: #ffffff; /* Texte blanc pour le code */
+
+  /* Icônes */
+  --bolt-elements-icon-success: #4caf50; /* Vert succès brillant */
+  --bolt-elements-icon-error: #f44336; /* Rouge erreur brillant */
 }
 
 /* Color Tokens Dark Theme */

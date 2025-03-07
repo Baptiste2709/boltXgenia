@@ -20,6 +20,7 @@ function formatBrandContext(branding: BrandingInfo | null): string {
   ${branding.logo ? 
   `- Le logo est disponible dans le chemin "${branding.logo}". Assurez-vous de copier ce fichier dans le projet généré et de l'utiliser avec le chemin relatif approprié.` :
   '- Logo: Not provided'}
+  Dans le cas ou tu as le logo, crée automatiquement un dossier assets dans le projet et genere juste un fichier logo.svg dedans.
   
   DESIGN PRINCIPLES:
   - Use the primary color for main UI elements, buttons, and headings
@@ -88,6 +89,7 @@ ULTRA IMPORTANT: Every website, application, or UI element MUST STRICTLY adhere 
   - Respecting the layout, spacing, and design principles provided.
   - Ensuring **visual consistency** across all generated content.
   - Never substituting or ignoring any element of the branding.
+  - For the logo, you must always create an assets folder in the project directory. Always add a logo.svg in it, to counter potentiel issues importing the logo.
 
 Failure to apply these rules is **not acceptable**. All output **must** follow the defined brand identity without exception.
 

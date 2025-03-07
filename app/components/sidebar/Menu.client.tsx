@@ -110,21 +110,21 @@ export function Menu() {
     >
       <div className="flex items-center h-[var(--header-height)]">{/* Placeholder */}</div>
       <div className="flex-1 flex flex-col h-full w-full overflow-hidden">
-      <div className="menu-container">
-      <BrandInfoSidebar />
-      </div>
+        <div className="menu-container">
+          <BrandInfoSidebar />
+        </div>
         <div className="p-4">
           <a
             href="/"
-            className="flex gap-2 items-center bg-bolt-elements-sidebar-buttonBackgroundDefault text-bolt-elements-sidebar-buttonText hover:bg-bolt-elements-sidebar-buttonBackgroundHover rounded-md p-2 transition-theme"
+            className="flex gap-2 items-center bg-white text-black hover:bg-gray-100 rounded-md p-2 transition-theme"
           >
             <span className="inline-block i-bolt:chat scale-110" />
-            Start new chat
+            Commencer une nouvelle conversation
           </a>
         </div>
-        <div className="text-bolt-elements-textPrimary font-medium pl-6 pr-5 my-2">Your Chats</div>
+        <div className="text-bolt-elements-textPrimary font-medium pl-6 pr-5 my-2">Vos conversations </div>
         <div className="flex-1 overflow-scroll pl-4 pr-5 pb-5">
-          {list.length === 0 && <div className="pl-2 text-bolt-elements-textTertiary">No previous conversations</div>}
+          {list.length === 0 && <div className="pl-2 text-bolt-elements-textTertiary">Aucune anciennes conversations</div>}
           <DialogRoot open={dialogContent !== null}>
             {binDates(list).map(({ category, items }) => (
               <div key={category} className="mt-4 first:mt-0 space-y-1">
@@ -139,13 +139,13 @@ export function Menu() {
             <Dialog onBackdrop={closeDialog} onClose={closeDialog}>
               {dialogContent?.type === 'delete' && (
                 <>
-                  <DialogTitle>Delete Chat?</DialogTitle>
+                  <DialogTitle>Supprimer la conversation ?</DialogTitle>
                   <DialogDescription asChild>
                     <div>
                       <p>
-                        You are about to delete <strong>{dialogContent.item.description}</strong>.
+                        Vous êtes sur le point de supprimer cette conversation <strong>{dialogContent.item.description}</strong>.
                       </p>
-                      <p className="mt-1">Are you sure you want to delete this chat?</p>
+                      <p className="mt-1">Êtes-vous sur de vouloir supprimer cette conversation ?</p>
                     </div>
                   </DialogDescription>
                   <div className="px-5 pb-4 bg-bolt-elements-background-depth-2 flex gap-2 justify-end">
@@ -159,7 +159,7 @@ export function Menu() {
                         closeDialog();
                       }}
                     >
-                      Delete
+                      Supprimer
                     </DialogButton>
                   </div>
                 </>
