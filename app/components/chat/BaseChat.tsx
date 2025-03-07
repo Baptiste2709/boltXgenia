@@ -12,7 +12,6 @@ import { toast } from 'react-toastify';
 
 import styles from './BaseChat.module.scss';
 
-// Déclarer l'API fs pour TypeScript
 declare global {
   interface Window {
     fs?: {
