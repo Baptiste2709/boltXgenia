@@ -3,9 +3,7 @@ import { memo, useState, useRef, useEffect } from 'react';
 import { useStore } from '@nanostores/react';
 import { workbenchStore } from '~/lib/stores/workbench';
 import { toast } from 'react-toastify';
-import { VSCodeService } from '~/utils/vscode-service';
 import { ZipService } from '~/utils/zip-service';
-import { classNames } from '~/utils/classNames';
 
 interface ProjectActionsMenuProps {
   className?: string;
@@ -104,11 +102,7 @@ export const ProjectActionsMenu = memo(({ className, showIcon = true }: ProjectA
     toast.info('Export vers GitHub Gist à venir...');
     setIsOpen(false);
   };
-  
-  const openInFiddle = () => {
-    toast.info('Ouverture dans JS Fiddle à venir...');
-    setIsOpen(false);
-  };
+
   
   return (
     <div className={`relative ${className}`}>
@@ -157,15 +151,7 @@ export const ProjectActionsMenu = memo(({ className, showIcon = true }: ProjectA
                 onClick={gitHubGistExport}
               >
                 <div className="i-ph:github-logo-duotone mr-2" />
-                Exporter vers GitHub Gist
-              </button>
-              
-              <button
-                className="flex items-center w-full px-4 py-2 text-sm text-bolt-elements-textSecondary bg-bolt-elements-item-backgroundDefault hover:bg-bolt-elements-item-backgroundActive"
-                onClick={openInFiddle}
-              >
-                <div className="i-ph:browser-duotone mr-2" />
-                Ouvrir dans JS Fiddle
+                Exporter vers GitHub
               </button>
             </div>
           </div>
