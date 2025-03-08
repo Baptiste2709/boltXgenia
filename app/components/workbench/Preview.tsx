@@ -79,11 +79,8 @@ export const Preview = memo(() => {
       )}
       <div className="bg-bolt-elements-background-depth-2 p-2 flex items-center gap-1.5">
         <IconButton icon="i-ph:arrow-clockwise" onClick={reloadPreview} />
-
-        <div
-          className="flex items-center gap-1 flex-grow bg-bolt-elements-preview-addressBar-background border border-bolt-elements-borderColor text-bolt-elements-preview-addressBar-text rounded-full px-3 py-1 text-sm hover:bg-bolt-elements-preview-addressBar-backgroundHover hover:focus-within:bg-bolt-elements-preview-addressBar-backgroundActive focus-within:bg-bolt-elements-preview-addressBar-backgroundActive
-        focus-within-border-bolt-elements-borderColorActive focus-within:text-bolt-elements-preview-addressBar-textActive"
-        >
+  
+        <div className="flex items-center gap-1 flex-grow bg-bolt-elements-preview-addressBar-background border border-bolt-elements-borderColor text-bolt-elements-preview-addressBar-text rounded-full px-3 py-1 text-sm hover:bg-bolt-elements-preview-addressBar-backgroundHover hover:focus-within:bg-bolt-elements-preview-addressBar-backgroundActive focus-within:bg-bolt-elements-preview-addressBar-backgroundActive focus-within-border-bolt-elements-borderColorActive focus-within:text-bolt-elements-preview-addressBar-textActive">
           <input
             ref={inputRef}
             className="w-full bg-transparent outline-none"
@@ -95,7 +92,7 @@ export const Preview = memo(() => {
             onKeyDown={(event) => {
               if (event.key === 'Enter' && validateUrl(url)) {
                 setIframeUrl(url);
-
+  
                 if (inputRef.current) {
                   inputRef.current.blur();
                 }
@@ -104,6 +101,19 @@ export const Preview = memo(() => {
           />
         </div>
       </div>
+      
+      {/* Ajouter cette partie qui était manquante */}
+      <div className="flex-1 bg-white">
+        {iframeUrl && (
+          <iframe
+            ref={iframeRef}
+            src={iframeUrl}
+            className="w-full h-full border-none"
+            sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
+            allow="accelerometer; camera; encrypted-media; geolocation; gyroscope; microphone; midi"
+          />
+        )}
+      </div>
     </div>
   );
-});
+})
