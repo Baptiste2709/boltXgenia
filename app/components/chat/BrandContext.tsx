@@ -1,3 +1,4 @@
+// app/components/chat/BrandContext.tsx
 import React, { createContext, useContext, useState, type ReactNode, useEffect } from 'react';
 
 // Interface pour les informations de la charte graphique

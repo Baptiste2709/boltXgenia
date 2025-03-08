@@ -1,3 +1,4 @@
+// app/components/chat/BaseChat.tsx
 import type { Message } from 'ai';
 import React, { useState, type RefCallback, useRef, useEffect, useCallback } from 'react';
 import { ClientOnly } from 'remix-utils/client-only';
@@ -9,28 +10,23 @@ import { Messages } from './Messages.client';
 import { SendButton } from './SendButton.client';
 import { useBranding } from '~/components/chat/BrandContext';
 import { toast } from 'react-toastify';
-
+import { AnimatePresence } from 'framer-motion';
+import BrandExtractModal from '~/components/chat/BrandExtractModal';
+import BrandManualModal from '~/components/chat/BrandManualModal';
 
 import styles from './BaseChat.module.scss';
 
-
+// Types étendus pour window
 declare global {
   interface Window {
     fs?: {
-      mkdir: (path: string) => Promise<void>;
+      mkdir: (path: string, options?: { recursive?: boolean }) => Promise<void>;
       writeFile: (path: string, data: Uint8Array) => Promise<void>;
       stat: (path: string) => Promise<any>;
     };
+    saveBrandLogo?: (imageUrl: string, savePath?: string) => Promise<string | null>;
     systemPrompt?: string;
   }
-}
-
-interface BrandingData {
-  isEnabled: boolean;
-  logoUrl: string | null;
-  primaryColor: string;
-  secondaryColor: string;
-  accentColor: string;
 }
 
 interface BaseChatProps {
@@ -59,108 +55,6 @@ const EXAMPLE_PROMPTS = [
 
 const TEXTAREA_MIN_HEIGHT = 76;
 
-async function extractWebsiteDesign(url: string) {
-  try {
-    // Fetch the website content through a proxy to avoid CORS issues
-    const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
-    const response = await fetch(proxyUrl);
-    const htmlContent = await response.text();
-
-    // Create a temporary DOM to parse the HTML
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(htmlContent, 'text/html');
-
-    // Extract logo
-    let logoUrl = null;
-    const logoSelectors = [
-      'link[rel="apple-touch-icon"]',
-      'link[rel="icon"]',
-      'meta[property="og:image"]',
-      'img.logo',
-      '#logo',
-      '.logo'
-    ];
-
-    for (const selector of logoSelectors) {
-      const logoElement = doc.querySelector(selector);
-      if (logoElement) {
-        logoUrl = logoElement.getAttribute('href') || logoElement.getAttribute('content') || logoElement.getAttribute('src');
-
-        // Convert relative URLs to absolute
-        if (logoUrl && !logoUrl.startsWith('http')) {
-          const baseUrl = new URL(url).origin;
-          logoUrl = new URL(logoUrl, baseUrl).href;
-        }
-
-        if (logoUrl) break;
-      }
-    }
-
-    // Extract colors from stylesheets
-    const colors: string[] = [];
-    const colorSet = new Set<string>();
-
-    // Extract inline styles and stylesheets
-    const styles = doc.querySelectorAll('style, link[rel="stylesheet"]');
-
-    styles.forEach(style => {
-      let styleContent = '';
-
-      if (style.tagName === 'STYLE') {
-        styleContent = style.textContent || '';
-      } else {
-        // For external stylesheets, we'd need to fetch them
-        // This is a simplification and might not work for all sites
-        const href = style.getAttribute('href');
-        if (href) {
-          // Fetch stylesheet
-          try {
-            const stylesheetUrl = new URL(href, url).href;
-            fetch(stylesheetUrl)
-              .then(res => res.text())
-              .then(cssText => {
-                styleContent = cssText;
-              });
-          } catch (e) {
-            console.error('Could not fetch stylesheet', e);
-          }
-        }
-      }
-
-      // Extract colors using regex
-      const colorMatches = styleContent.match(/#[0-9A-Fa-f]{6}|rgba?\([^)]*\)|hsla?\([^)]*\)|[a-zA-Z]+/g) || [];
-      colorMatches.forEach(color => {
-        if (color.startsWith('#') || color.startsWith('rgb') || color.startsWith('hsl')) {
-          colorSet.add(color.toLowerCase());
-        }
-      });
-    });
-
-    // Convert color set to array and limit to top 3
-    const extractedColors = Array.from(colorSet).slice(0, 3);
-
-    // Detect font
-    let fontFamily = 'inter'; // default
-    const bodyStyles = window.getComputedStyle(doc.body);
-    const detectedFont = bodyStyles.getPropertyValue('font-family');
-    if (detectedFont) {
-      fontFamily = detectedFont.split(',')[0].replace(/['"]/g, '').toLowerCase();
-    }
-
-    return {
-      logo: logoUrl,
-      primaryColor: extractedColors[0] || '#3B82F6',
-      secondaryColor: extractedColors[1] || '#10B981',
-      accentColor: extractedColors[2] || '#F59E0B',
-      fontFamily: fontFamily
-    };
-  } catch (error) {
-    console.error('Error extracting website design:', error);
-    throw new Error('Could not extract design information');
-  }
-}
-
-
 export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
   (
     {
@@ -181,23 +75,11 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
     },
     ref,
   ) => {
-
-    // Récupérer les données de branding depuis le stockage
-    const brandingData = typeof window !== 'undefined' ?
-      ((window as any).currentBrandingData ||
-        JSON.parse(localStorage.getItem('brandingData') || '{"isEnabled":false}'))
-      : { isEnabled: false };
     const TEXTAREA_MAX_HEIGHT = chatStarted ? 400 : 200;
     const [showBrandingForm, setShowBrandingForm] = useState(false);
+    const [showBrandExtractModal, setShowBrandExtractModal] = useState(false);
+    const [showBrandManualModal, setShowBrandManualModal] = useState(false);
     const { branding, updateBranding } = useBranding();
-
-    const primaryColorInputRef = useRef<HTMLInputElement>(null);
-    const primaryColorTextRef = useRef<HTMLInputElement>(null);
-    const secondaryColorInputRef = useRef<HTMLInputElement>(null);
-    const secondaryColorTextRef = useRef<HTMLInputElement>(null);
-    const accentColorInputRef = useRef<HTMLInputElement>(null);
-    const accentColorTextRef = useRef<HTMLInputElement>(null);
-    const fontFamilyRef = useRef<HTMLSelectElement>(null);
 
     // Effet pour masquer le formulaire pendant la génération
     useEffect(() => {
@@ -249,154 +131,6 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
       updateBranding({ isCustomBranding: isChecked });
       event.target.closest('label')?.setAttribute('data-custom-branding', String(isChecked));
     };
-
-    const handleColorChange = (type: 'primary' | 'secondary' | 'accent', value: string, isInput: boolean) => {
-      if (isInput) {
-        // Mise à jour du champ texte correspondant
-        switch (type) {
-          case 'primary':
-            if (primaryColorTextRef.current) primaryColorTextRef.current.value = value;
-            break;
-          case 'secondary':
-            if (secondaryColorTextRef.current) secondaryColorTextRef.current.value = value;
-            break;
-          case 'accent':
-            if (accentColorTextRef.current) accentColorTextRef.current.value = value;
-            break;
-        }
-      } else {
-        // Mise à jour du champ couleur correspondant
-        switch (type) {
-          case 'primary':
-            if (primaryColorInputRef.current) primaryColorInputRef.current.value = value;
-            break;
-          case 'secondary':
-            if (secondaryColorInputRef.current) secondaryColorInputRef.current.value = value;
-            break;
-          case 'accent':
-            if (accentColorInputRef.current) accentColorInputRef.current.value = value;
-            break;
-        }
-      }
-    };
-
-    // Gestionnaire de drag & drop
-    const handleDragOver = (e: React.DragEvent) => {
-      e.preventDefault();
-      e.currentTarget.classList.add('border-bolt-elements-item-contentAccent');
-    };
-
-    const handleDragLeave = (e: React.DragEvent) => {
-      e.currentTarget.classList.remove('border-bolt-elements-item-contentAccent');
-    };
-
-    const handleDrop = (e: React.DragEvent) => {
-      e.preventDefault();
-      e.currentTarget.classList.remove('border-bolt-elements-item-contentAccent');
-
-      if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-        const file = e.dataTransfer.files[0];
-        // Traitement du fichier logo
-        if (file.type.match('image.*')) {
-          const reader = new FileReader();
-          reader.onload = (event) => {
-            const imgPreview = document.getElementById('logo-preview') as HTMLImageElement;
-            const uploadText = document.getElementById('logo-upload-text');
-
-            if (imgPreview && event.target?.result) {
-              imgPreview.src = event.target.result as string;
-              imgPreview.classList.remove('hidden');
-
-              // Masquer le texte quand logo présent
-              if (uploadText) {
-                uploadText.classList.add('hidden');
-              }
-            }
-          };
-          reader.readAsDataURL(file);
-        }
-      }
-
-
-    };
-
-    const applyBrandingChanges = () => {
-      const logoPreview = document.getElementById('logo-preview') as HTMLImageElement;
-      // Vérifier si le logo est visible
-      const logoSrc = logoPreview && !logoPreview.classList.contains('hidden') ? logoPreview.src : null;
-
-      // Mettre à jour le branding
-      const newBranding = {
-        logo: logoSrc,
-        primaryColor: primaryColorInputRef.current?.value || branding.primaryColor,
-        secondaryColor: secondaryColorInputRef.current?.value || branding.secondaryColor,
-        accentColor: accentColorInputRef.current?.value || branding.accentColor,
-        fontFamily: fontFamilyRef.current?.value || branding.fontFamily,
-        isCustomBranding: true
-      };
-
-      updateBranding(newBranding);
-
-      // Afficher une confirmation
-      toast.success('Charte graphique appliquée!');
-    };
-
-    const websiteInputRef = useRef<HTMLInputElement>(null);
-    const [isExtracting, setIsExtracting] = useState(false);
-
-    const extractDesignFromWebsite = useCallback(async () => {
-      const websiteUrl = websiteInputRef.current?.value;
-
-      if (!websiteUrl) {
-        toast.error('Veuillez entrer une URL valide');
-        return;
-      }
-
-      setIsExtracting(true);
-      try {
-        const extractedDesign = await extractWebsiteDesign(websiteUrl);
-
-        // Update branding with extracted design
-        updateBranding({
-          ...extractedDesign,
-          isCustomBranding: true
-        });
-
-        // Update form inputs
-        if (primaryColorInputRef.current)
-          primaryColorInputRef.current.value = extractedDesign.primaryColor;
-        if (secondaryColorInputRef.current)
-          secondaryColorInputRef.current.value = extractedDesign.secondaryColor;
-        if (accentColorInputRef.current)
-          accentColorInputRef.current.value = extractedDesign.accentColor;
-        if (fontFamilyRef.current)
-          fontFamilyRef.current.value = extractedDesign.fontFamily;
-
-        // Update logo preview if available
-        if (extractedDesign.logo) {
-          const imgPreview = document.getElementById('logo-preview') as HTMLImageElement;
-          const uploadText = document.getElementById('logo-upload-text');
-
-          if (imgPreview) {
-            imgPreview.src = extractedDesign.logo;
-            imgPreview.classList.remove('hidden');
-
-            if (uploadText) {
-              uploadText.classList.add('hidden');
-            }
-          }
-        }
-
-        // Show branding form and toast
-        setShowBrandingForm(true);
-        toast.success('Design extrait avec succès !');
-      } catch (error) {
-        toast.error('Impossible d\'extraire les informations de design');
-      } finally {
-        setIsExtracting(false);
-      }
-    }, [updateBranding]);
-
 
     return (
       <div
@@ -544,172 +278,55 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                           <div className="i-ph:x-circle"></div>
                         </button>
                       </div>
-                      {/* Ajout du champ d'extraction de site web */}
-                      <div className="flex flex-col mb-2">
-                        <label className="text-sm text-bolt-elements-textSecondary mb-1">Extraire le design d'un site web</label>
-                        <div className="flex items-center">
-                          <input
-                            ref={websiteInputRef}
-                            type="url"
-                            placeholder="Entrez l'URL du site"
-                            className="flex-grow p-2 text-sm bg-bolt-elements-background-depth-1 border border-bolt-elements-borderColor rounded-l-md text-bolt-elements-textPrimary"
-                          />
-                          <button
-                            onClick={extractDesignFromWebsite}
-                            disabled={isExtracting}
-                            className="bg-bolt-elements-item-contentAccent text-white px-3 py-2 rounded-r-md hover:brightness-110 transition-all"
-                          >
-                            {isExtracting ? (
-                              <div className="i-svg-spinners:3-dots-fade"></div>
-                            ) : (
-                              'Extraire'
-                            )}
-                          </button>
-                        </div>
-                      </div>
-
-                      {/* Zone de drop pour le logo */}
-                      <div className="flex flex-col">
-                        <label className="text-sm text-bolt-elements-textSecondary mb-1">Logo</label>
-                        <div
-                          className="h-24 flex items-center justify-center border-2 border-dashed border-bolt-elements-borderColor rounded-md bg-bolt-elements-background-depth-1 transition-colors duration-150 cursor-pointer"
-                          onDragOver={handleDragOver}
-                          onDragLeave={handleDragLeave}
-                          onDrop={handleDrop}
-                          onClick={() => document.getElementById('logo-input')?.click()}
+                      
+                      {/* Boutons d'action pour les différentes méthodes */}
+                      <div className="flex flex-col space-y-3">
+                        {/* Bouton pour saisie manuelle */}
+                        <button
+                          onClick={() => setShowBrandManualModal(true)}
+                          className="flex items-center justify-center w-full p-3 bg-bolt-elements-item-backgroundAccent text-bolt-elements-item-contentAccent rounded-md hover:brightness-110 transition-all"
                         >
-                          <input
-                            id="logo-input"
-                            type="file"
-                            accept="image/*"
-                            className="hidden"
-                            onChange={(e) => {
-                              if (e.target.files && e.target.files[0]) {
-                                const reader = new FileReader();
-                                reader.onload = (event) => {
-                                  const imgPreview = document.getElementById('logo-preview') as HTMLImageElement;
-                                  const uploadText = document.getElementById('logo-upload-text');
+                          <div className="i-ph:pencil-duotone mr-2"></div>
+                          Saisie manuelle
+                        </button>
+                        
+                        {/* Bouton pour extraction via API */}
+                        <button
+                          onClick={() => setShowBrandExtractModal(true)}
+                          className="flex items-center justify-center w-full p-3 bg-bolt-elements-item-backgroundAccent text-bolt-elements-item-contentAccent rounded-md hover:brightness-110 transition-all"
+                        >
+                          <div className="i-ph:globe-duotone mr-2"></div>
+                          Extraire via API
+                        </button>
 
-                                  if (imgPreview && event.target?.result) {
-                                    imgPreview.src = event.target.result as string;
-                                    imgPreview.classList.remove('hidden');
-
-                                    // Masquer le texte quand logo présent
-                                    if (uploadText) {
-                                      uploadText.classList.add('hidden');
-                                    }
-                                  }
-                                };
-                                reader.readAsDataURL(e.target.files[0]);
-                              }
-                            }}
-                          />
-                          <div className="flex flex-col items-center">
-                            <img id="logo-preview" src="" alt="Logo preview" className="hidden max-h-20 mb-2" />
-                            <div className="text-sm text-bolt-elements-textTertiary" id="logo-upload-text">
-                              Glissez-déposez votre logo ou cliquez pour sélectionner
+                        {/* Aperçu de la charte actuelle si elle existe */}
+                        {branding.isCustomBranding && (
+                          <div className="mt-4 p-3 bg-bolt-elements-background-depth-1 rounded-md">
+                            <h4 className="text-sm font-medium text-bolt-elements-textPrimary mb-2">Charte actuelle :</h4>
+                            <div className="space-y-2">
+                              {branding.logo && (
+                                <div className="flex justify-center">
+                                  <img src={branding.logo} alt="Logo actuel" className="max-h-12 max-w-full" />
+                                </div>
+                              )}
+                              <div className="flex items-center">
+                                <div className="w-4 h-4 rounded-full mr-1" style={{ backgroundColor: branding.primaryColor }}></div>
+                                <span className="text-xs text-bolt-elements-textSecondary">{branding.primaryColor}</span>
+                              </div>
+                              <div className="flex items-center">
+                                <div className="w-4 h-4 rounded-full mr-1" style={{ backgroundColor: branding.secondaryColor }}></div>
+                                <span className="text-xs text-bolt-elements-textSecondary">{branding.secondaryColor}</span>
+                              </div>
+                              <div className="flex items-center">
+                                <div className="w-4 h-4 rounded-full mr-1" style={{ backgroundColor: branding.accentColor }}></div>
+                                <span className="text-xs text-bolt-elements-textSecondary">{branding.accentColor}</span>
+                              </div>
+                              <div className="text-xs text-bolt-elements-textSecondary">
+                                Police : {branding.fontFamily}
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      </div>
-
-                      {/* Sélecteurs de couleurs */}
-                      <div className="flex flex-col">
-                        <label className="text-sm text-bolt-elements-textSecondary mb-1">Couleur principale</label>
-                        <div className="flex items-center">
-                          <input
-                            ref={primaryColorInputRef}
-                            type="color"
-                            defaultValue={branding.primaryColor}
-                            className="w-10 h-10 p-0 border-none rounded-md mr-2 cursor-pointer"
-                            onChange={(e) => handleColorChange('primary', e.target.value, true)}
-                          />
-                          <input
-                            ref={primaryColorTextRef}
-                            type="text"
-                            defaultValue={branding.primaryColor}
-                            className="flex-grow p-2 text-sm bg-bolt-elements-background-depth-1 border border-bolt-elements-borderColor rounded-md text-bolt-elements-textPrimary"
-                            onChange={(e) => handleColorChange('primary', e.target.value, false)}
-                          />
-                        </div>
-                      </div>
-
-                      {/* Couleur secondaire */}
-                      <div className="flex flex-col">
-                        <label className="text-sm text-bolt-elements-textSecondary mb-1">Couleur secondaire</label>
-                        <div className="flex items-center">
-                          <input
-                            ref={secondaryColorInputRef}
-                            type="color"
-                            defaultValue={branding.secondaryColor}
-                            className="w-10 h-10 p-0 border-none rounded-md mr-2 cursor-pointer"
-                            onChange={(e) => handleColorChange('secondary', e.target.value, true)}
-                          />
-                          <input
-                            ref={secondaryColorTextRef}
-                            type="text"
-                            defaultValue={branding.secondaryColor}
-                            className="flex-grow p-2 text-sm bg-bolt-elements-background-depth-1 border border-bolt-elements-borderColor rounded-md text-bolt-elements-textPrimary"
-                            onChange={(e) => handleColorChange('secondary', e.target.value, false)}
-                          />
-                        </div>
-                      </div>
-
-                      {/* Couleur d'accent */}
-                      <div className="flex flex-col">
-                        <label className="text-sm text-bolt-elements-textSecondary mb-1">Couleur d'accent</label>
-                        <div className="flex items-center">
-                          <input
-                            ref={accentColorInputRef}
-                            type="color"
-                            defaultValue={branding.accentColor}
-                            className="w-10 h-10 p-0 border-none rounded-md mr-2 cursor-pointer"
-                            onChange={(e) => handleColorChange('accent', e.target.value, true)}
-                          />
-                          <input
-                            ref={accentColorTextRef}
-                            type="text"
-                            defaultValue={branding.accentColor}
-                            className="flex-grow p-2 text-sm bg-bolt-elements-background-depth-1 border border-bolt-elements-borderColor rounded-md text-bolt-elements-textPrimary"
-                            onChange={(e) => handleColorChange('accent', e.target.value, false)}
-                          />
-                        </div>
-                      </div>
-
-                      {/* Sélecteur de police */}
-                      <div className="flex flex-col">
-                        <label className="text-sm text-bolt-elements-textSecondary mb-1">Police de caractères</label>
-                        <select
-                          ref={fontFamilyRef}
-                          className="p-2 text-sm bg-bolt-elements-background-depth-1 border border-bolt-elements-borderColor rounded-md text-bolt-elements-textPrimary"
-                          defaultValue={branding.fontFamily}
-                        >
-                          <option value="Inter">Inter (Par défaut)</option>
-                          <option value="Poppins">Poppins</option>
-                          <option value="Montserrat">Montserrat</option>
-                          <option value="Roboto">Roboto</option>
-                          <option value="Open sans">Open Sans</option>
-                          <option value="Lato">Lato</option>
-                          <option value="Raleway">Raleway</option>
-                          <option value="Playfair Display">Playfair Display</option>
-                          <option value="Source Code Pro">Source Code Pro</option>
-                          <option value="Merriweather">Merriweather</option>
-                          <option value="Space Grotesk">Space Grotesk</option>
-                        </select>
-                      </div>
-
-                      {/* Bouton d'application des changements */}
-                      <div className="flex justify-end">
-                        <ClientOnly>
-                          {() => (
-                            <button
-                              className="px-4 py-2 bg-bolt-elements-item-contentAccent text-white rounded-md text-sm hover:bg-opacity-90 transition-colors"
-                              onClick={applyBrandingChanges}
-                            >
-                              Appliquer les changements
-                            </button>
-                          )}
-                        </ClientOnly>
+                        )}
                       </div>
                     </div>
                   )}
@@ -741,6 +358,22 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
           </div>
           <ClientOnly>{() => <Workbench chatStarted={chatStarted} isStreaming={isStreaming} />}</ClientOnly>
         </div>
+        
+        {/* Modals pour la charte graphique */}
+        <AnimatePresence>
+          {showBrandExtractModal && (
+            <BrandExtractModal 
+              isOpen={showBrandExtractModal} 
+              onClose={() => setShowBrandExtractModal(false)} 
+            />
+          )}
+          {showBrandManualModal && (
+            <BrandManualModal 
+              isOpen={showBrandManualModal} 
+              onClose={() => setShowBrandManualModal(false)} 
+            />
+          )}
+        </AnimatePresence>
       </div>
     );
   },
