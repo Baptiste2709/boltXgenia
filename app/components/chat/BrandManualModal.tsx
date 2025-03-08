@@ -152,7 +152,7 @@ const BrandManualModal: React.FC<BrandManualModalProps> = ({ isOpen, onClose }) 
           <h2 className="text-xl font-medium text-bolt-elements-textPrimary">Saisie manuelle de la charte graphique</h2>
           <button
             onClick={onClose}
-            className="text-bolt-elements-textSecondary hover:text-bolt-elements-textPrimary"
+            className="text-bolt-elements-textSecondary bg-bolt-elements-background-depth-2 hover:text-bolt-elements-textPrimary"
           >
             <div className="i-ph:x-circle text-xl"></div>
           </button>
