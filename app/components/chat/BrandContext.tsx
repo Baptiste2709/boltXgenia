@@ -1,10 +1,12 @@
-// app/components/chat/BrandContext.tsx
+// 1. Remplacer la fonction saveBrandLogo dans BrandContext.tsx
+import { toast } from 'react-toastify';
+
 import React, { createContext, useContext, useState, type ReactNode, useEffect } from 'react';
 
 // Interface pour les informations de la charte graphique
 export interface BrandingInfo {
   logo: string | null;
-  savedPath?: string | null; // Chemin où le logo a été sauvegardé dans le projet
+  savedPath?: string | null;
   primaryColor: string;
   secondaryColor: string;
   accentColor: string;
@@ -26,11 +28,69 @@ const defaultBranding: BrandingInfo = {
 // Clé localStorage
 const STORAGE_KEY = 'genia-branding-info';
 
+// Fonction utilitaire pour sauvegarder un logo dans le système de fichiers
+export async function saveBrandLogo(logoDataUrl: string) {
+  console.log("Tentative de sauvegarde du logo");
+  
+  if (!window.fs) {
+    console.error("window.fs n'est pas disponible");
+    return null;
+  }
+  
+  try {
+    toast('1');
+    // Créer le dossier charte_logos s'il n'existe pas
+    const logoDir = '/home/project/charte_logos';
+    
+    try {
+      await window.fs.mkdir(logoDir, { recursive: true });
+      console.log("Dossier créé ou existant:", logoDir);
+    } catch (dirError) {
+      console.error("Erreur lors de la création du dossier:", dirError);
+    }
+    
+    // Traiter la Data URL pour obtenir le binaire
+    const matches = logoDataUrl.match(/^data:([A-Za-z-+/]+);base64,(.+)$/);
+    
+    if (!matches || matches.length !== 3) {
+      throw new Error("Format de Data URL invalide");
+    }
+    
+    const mimeType = matches[1];
+    const base64Data = matches[2];
+    const binaryData = atob(base64Data);
+    
+    // Convertir en Uint8Array
+    const uint8Array = new Uint8Array(binaryData.length);
+    for (let i = 0; i < binaryData.length; i++) {
+      uint8Array[i] = binaryData.charCodeAt(i);
+    }
+    
+    // Déterminer l'extension de fichier
+    let extension = 'png';
+    if (mimeType.includes('svg')) extension = 'svg';
+    else if (mimeType.includes('jpeg') || mimeType.includes('jpg')) extension = 'jpg';
+    
+    // Chemin du fichier
+    const logoPath = `${logoDir}/logo.${extension}`;
+    
+    // Écrire le fichier
+    await window.fs.writeFile(logoPath, uint8Array);
+    console.log("Logo sauvegardé avec succès à:", logoPath);
+    
+    return logoPath;
+  } catch (error) {
+    console.error("Erreur lors de la sauvegarde du logo:", error);
+    return null;
+  }
+}
+
 // Créer le contexte
 interface BrandingContextType {
   branding: BrandingInfo;
   updateBranding: (newBranding: Partial<BrandingInfo>) => void;
   resetBranding: () => void;
+  saveLogo: (logoDataUrl: string) => Promise<string | null>;
 }
 
 const BrandingContext = createContext<BrandingContextType | undefined>(undefined);
@@ -73,9 +133,14 @@ export const BrandingProvider: React.FC<{ children: ReactNode }> = ({ children }
   const resetBranding = () => {
     setBranding(defaultBranding);
   };
+  
+  // Fonction pour sauvegarder le logo
+  const saveLogo = async (logoDataUrl: string) => {
+    return await saveBrandLogo(logoDataUrl);
+  };
 
   return (
-    <BrandingContext.Provider value={{ branding, updateBranding, resetBranding }}>
+    <BrandingContext.Provider value={{ branding, updateBranding, resetBranding, saveLogo }}>
       {children}
     </BrandingContext.Provider>
   );

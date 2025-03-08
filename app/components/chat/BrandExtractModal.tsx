@@ -1,4 +1,4 @@
-// app/components/chat/BrandExtractModal.tsx
+// app/components/chat/BrandExtractModal.tsx (version mise à jour)
 import React, { useState } from 'react';
 import { useBranding } from '~/components/chat/BrandContext';
 import { BrandfetchService } from '~/utils/brandfetch-service';
@@ -11,7 +11,7 @@ interface BrandExtractModalProps {
 }
 
 export const BrandExtractModal: React.FC<BrandExtractModalProps> = ({ isOpen, onClose }) => {
-  const { updateBranding } = useBranding();
+  const { updateBranding, saveLogo } = useBranding();
   const [isExtracting, setIsExtracting] = useState(false);
   const [progressMessage, setProgressMessage] = useState('');
   const [urlInput, setUrlInput] = useState('');
@@ -78,15 +78,30 @@ export const BrandExtractModal: React.FC<BrandExtractModalProps> = ({ isOpen, on
       // Appeler l'API Brandfetch
       const brandInfo = await BrandfetchService.fetchBrandInfo(urlInput, updateProgress);
       
-      // Journaliser les informations reçues
-      console.log("Informations de marque reçues:", {
-        ...brandInfo,
-        hasLogo: !!brandInfo.logo
-      });
+      // Variables pour stocker le chemin du logo sauvegardé
+      let savedLogoPath = null;
+      
+      // Si un logo est présent, essayer de le sauvegarder
+      if (brandInfo.logo) {
+        updateProgress("Sauvegarde du logo dans le projet...");
+        try {
+          savedLogoPath = await saveLogo(brandInfo.logo);
+          
+          if (savedLogoPath) {
+            console.log("Logo sauvegardé avec succès dans:", savedLogoPath);
+            updateProgress(`Logo sauvegardé dans: ${savedLogoPath}`);
+          } else {
+            console.warn("Échec de la sauvegarde du logo");
+          }
+        } catch (logoError) {
+          console.error("Erreur lors de la sauvegarde du logo:", logoError);
+        }
+      }
       
       // Mettre à jour le contexte de branding
       updateBranding({
         ...brandInfo,
+        savedPath: savedLogoPath,
         isCustomBranding: true
       });
       

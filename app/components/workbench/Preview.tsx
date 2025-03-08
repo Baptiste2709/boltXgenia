@@ -10,7 +10,7 @@ export const Preview = memo(() => {
   const inputRef = useRef<HTMLInputElement>(null);
   const [activePreviewIndex, setActivePreviewIndex] = useState(0);
   const [isPortDropdownOpen, setIsPortDropdownOpen] = useState(false);
-  const hasSelectedPreview = useRef(false);
+  const [hasSelectedPreview, setHasSelectedPreview] = useState(false);
   const previews = useStore(workbenchStore.previews);
   const activePreview = previews[activePreviewIndex];
 
@@ -21,15 +21,13 @@ export const Preview = memo(() => {
     if (!activePreview) {
       setUrl('');
       setIframeUrl(undefined);
-
       return;
     }
 
     const { baseUrl } = activePreview;
-
     setUrl(baseUrl);
     setIframeUrl(baseUrl);
-  }, [activePreview, iframeUrl]);
+  }, [activePreview, activePreviewIndex]);
 
   const validateUrl = useCallback(
     (value: string) => {
@@ -59,12 +57,11 @@ export const Preview = memo(() => {
 
   // when previews change, display the lowest port if user hasn't selected a preview
   useEffect(() => {
-    if (previews.length > 1 && !hasSelectedPreview.current) {
+    if (previews.length > 1 && !hasSelectedPreview) {
       const minPortIndex = previews.reduce(findMinPortIndex, 0);
-
       setActivePreviewIndex(minPortIndex);
     }
-  }, [previews]);
+  }, [previews, hasSelectedPreview]);
 
   const reloadPreview = () => {
     if (iframeRef.current) {
@@ -75,7 +72,10 @@ export const Preview = memo(() => {
   return (
     <div className="w-full h-full flex flex-col">
       {isPortDropdownOpen && (
-        <div className="z-iframe-overlay w-full h-full absolute" onClick={() => setIsPortDropdownOpen(false)} />
+        <div 
+          className="z-iframe-overlay w-full h-full absolute" 
+          onClick={() => setIsPortDropdownOpen(false)} 
+        />
       )}
       <div className="bg-bolt-elements-background-depth-2 p-2 flex items-center gap-1.5">
         <IconButton icon="i-ph:arrow-clockwise" onClick={reloadPreview} />
@@ -100,9 +100,19 @@ export const Preview = memo(() => {
             }}
           />
         </div>
+        
+        {previews.length > 0 && (
+          <PortDropdown
+            activePreviewIndex={activePreviewIndex}
+            setActivePreviewIndex={setActivePreviewIndex}
+            isDropdownOpen={isPortDropdownOpen}
+            setIsDropdownOpen={setIsPortDropdownOpen}
+            setHasSelectedPreview={setHasSelectedPreview}
+            previews={previews}
+          />
+        )}
       </div>
       
-      {/* Ajouter cette partie qui était manquante */}
       <div className="flex-1 bg-white">
         {iframeUrl && (
           <iframe
@@ -116,4 +126,4 @@ export const Preview = memo(() => {
       </div>
     </div>
   );
-})
+});

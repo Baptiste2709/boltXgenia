@@ -251,17 +251,17 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
 
                   {/* Toggle pour importer sa propre charte graphique */}
                   <div className="flex items-center pl-4 mt-2 mb-2 w-full">
-                    <label className="relative inline-flex items-center cursor-pointer" data-custom-branding="false">
-                      <input
-                        type="checkbox"
-                        className="sr-only peer"
-                        onChange={toggleCustomBranding}
-                        checked={branding.isCustomBranding}
-                      />
-                      <div className="w-11 h-6 bg-bolt-elements-borderColor peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-bolt-elements-item-contentAccent"></div>
-                      <span className="ml-3 text-sm text-bolt-elements-textSecondary">Importer sa propre charte graphique</span>
-                    </label>
-                  </div>
+                  <label className="relative inline-flex items-center cursor-pointer" data-custom-branding={branding.isCustomBranding ? "true" : "false"}>
+                    <input
+                      type="checkbox"
+                      className="sr-only peer"
+                      onChange={toggleCustomBranding}
+                      checked={branding.isCustomBranding}
+                    />
+                    <div className="w-11 h-6 bg-bolt-elements-borderColor peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-bolt-elements-item-contentAccent"></div>
+                    <span className="ml-3 text-sm text-bolt-elements-textSecondary">Importer sa propre charte graphique</span>
+                  </label>
+                </div>
                 </div>
 
                 {/* Layout flexible pour le formulaire */}

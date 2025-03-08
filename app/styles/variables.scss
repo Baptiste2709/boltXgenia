@@ -121,6 +121,17 @@
   /* Icônes */
   --bolt-elements-icon-success: #4caf50; /* Vert succès brillant */
   --bolt-elements-icon-error: #f44336; /* Rouge erreur brillant */
+
+  /* Styles pour la barre d'adresse de prévisualisation */
+  --bolt-elements-preview-addressBar-background: var(--bolt-elements-background-depth-1);
+  --bolt-elements-preview-addressBar-backgroundHover: var(--bolt-elements-background-depth-2);
+  --bolt-elements-preview-addressBar-backgroundActive: var(--bolt-elements-background-depth-3);
+  --bolt-elements-preview-addressBar-text: var(--bolt-elements-textPrimary);
+  --bolt-elements-preview-addressBar-textActive: var(--bolt-elements-textPrimary);
+
+  /* Styles pour le terminal */
+  --bolt-elements-terminals-background: var(--bolt-elements-background-depth-1);
+  --bolt-elements-terminals-buttonBackground: var(--bolt-elements-item-backgroundAccent);
 }
 
 /* Color Tokens Dark Theme */
@@ -170,6 +181,16 @@
   --bolt-elements-artifacts-borderColor: #8e44ad; /* Violet foncé pour les bordures */
   --bolt-elements-artifacts-inlineCode-background: #7b3f8e; /* Violet foncé pour le code */
   --bolt-elements-artifacts-inlineCode-text: #ffffff; /* Texte blanc pour le code */
+
+  --bolt-elements-preview-addressBar-background: var(--bolt-elements-background-depth-3);
+  --bolt-elements-preview-addressBar-backgroundHover: var(--bolt-elements-background-depth-3);
+  --bolt-elements-preview-addressBar-backgroundActive: var(--bolt-elements-background-depth-4);
+  --bolt-elements-preview-addressBar-text: var(--bolt-elements-textPrimary);
+  --bolt-elements-preview-addressBar-textActive: var(--bolt-elements-textPrimary);
+
+  /* Styles pour le terminal */
+  --bolt-elements-terminals-background: var(--bolt-elements-background-depth-2);
+  --bolt-elements-terminals-buttonBackground: var(--bolt-elements-item-backgroundAccent);
 }
 
 /*
@@ -210,4 +231,27 @@
   --bolt-elements-terminal-color-brightMagenta: var(--bolt-terminal-brightMagenta);
   --bolt-elements-terminal-color-brightCyan: var(--bolt-terminal-brightCyan);
   --bolt-elements-terminal-color-brightWhite: var(--bolt-terminal-brightWhite);
+  --bolt-terminal-background: #282A36;
+  --bolt-terminal-foreground: #f8f8f2;
+  --bolt-terminal-selection-background: #44475a;
+  --bolt-terminal-selection-foreground: #ffffff;
+  --bolt-terminal-selection-background-inactive: #44475a;
+  --bolt-terminal-cursor-color-accent: transparent;
+  
+  --bolt-terminal-black: #000000;
+  --bolt-terminal-red: #ff5555;
+  --bolt-terminal-green: #50fa7b;
+  --bolt-terminal-yellow: #f1fa8c;
+  --bolt-terminal-blue: #bd93f9;
+  --bolt-terminal-magenta: #ff79c6;
+  --bolt-terminal-cyan: #8be9fd;
+  --bolt-terminal-white: #bfbfbf;
+  --bolt-terminal-brightBlack: #4d4d4d;
+  --bolt-terminal-brightRed: #ff6e67;
+  --bolt-terminal-brightGreen: #5af78e;
+  --bolt-terminal-brightYellow: #f4f99d;
+  --bolt-terminal-brightBlue: #caa9fa;
+  --bolt-terminal-brightMagenta: #ff92d0;
+  --bolt-terminal-brightCyan: #9aedfe;
+  --bolt-terminal-brightWhite: #e6e6e6;
 }

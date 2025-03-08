@@ -1,4 +1,4 @@
-// app/components/chat/BrandManualModal.tsx
+// app/components/chat/BrandManualModal.tsx (version mise à jour)
 import React, { useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { toast } from 'react-toastify';
@@ -10,7 +10,7 @@ interface BrandManualModalProps {
 }
 
 const BrandManualModal: React.FC<BrandManualModalProps> = ({ isOpen, onClose }) => {
-  const { branding, updateBranding } = useBranding();
+  const { branding, updateBranding, saveLogo } = useBranding();
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   // Refs pour les champs du formulaire
@@ -80,20 +80,30 @@ const BrandManualModal: React.FC<BrandManualModalProps> = ({ isOpen, onClose }) 
       let savedLogoPath = null;
       
       // Si un logo est présent, le sauvegarder dans le projet
-      if (logoPreview && typeof window.saveBrandLogo === 'function') {
+      if (logoPreview) {
+        console.log("Tentative de sauvegarde du logo:", logoPreview.substring(0, 50) + "...");
+        
+        toast.update(toastId, {
+          render: "Sauvegarde du logo en cours...",
+          isLoading: true
+        });
+        
         try {
-          savedLogoPath = await window.saveBrandLogo(logoPreview);
+          // Utiliser la fonction saveLogo du contexte au lieu de window.saveBrandLogo
+          savedLogoPath = await saveLogo(logoPreview);
           
           if (savedLogoPath) {
+            console.log("Logo sauvegardé avec succès dans:", savedLogoPath);
             toast.update(toastId, {
-              render: "Logo sauvegardé dans le projet",
+              render: `Logo sauvegardé dans: ${savedLogoPath}`,
               type: "info",
               isLoading: true
             });
+          } else {
+            console.warn("Échec de la sauvegarde du logo");
           }
-        } catch (error) {
-          console.error("Erreur lors de la sauvegarde du logo:", error);
-          // Continuer même si la sauvegarde échoue
+        } catch (logoError) {
+          console.error("Erreur lors de la sauvegarde du logo:", logoError);
         }
       }
       
