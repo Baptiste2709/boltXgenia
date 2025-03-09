@@ -2,10 +2,12 @@ import { MODIFICATIONS_TAG_NAME, WORK_DIR } from '~/utils/constants';
 import { allowedHTMLElements } from '~/utils/markdown';
 import { stripIndents } from '~/utils/stripIndent';
 import type { BrandingInfo } from '~/components/chat/BrandContext';
-import { toast } from 'react-toastify';
 
-
-// Function to format the brand context into a string for the prompt
+/**
+ * Formate les informations de branding en texte pour inclusion dans le prompt système
+ * @param branding Informations de la charte graphique 
+ * @returns Chaîne formatée pour insertion dans le prompt système
+ */
 function formatBrandContext(branding: BrandingInfo | null): string {
   if (!branding) return '';
 
@@ -115,7 +117,14 @@ Failure to apply these rules is **not acceptable**. All output **must** follow t
   `;
 }
 
+/**
+ * Génère le prompt système pour l'IA
+ * @param cwd Répertoire de travail courant (par défaut WORK_DIR)
+ * @param branding Informations de la charte graphique (optionnel)
+ * @returns Prompt système complet
+ */
 export const getSystemPrompt = (cwd: string = WORK_DIR, branding: BrandingInfo | null = null) => {
+  // Récupère le contexte de branding si disponible
   const brandContext = branding?.isCustomBranding ? formatBrandContext(branding) : null;
 
   return `
@@ -385,7 +394,6 @@ Here are some examples of correct usage of artifacts:
     </assistant_response>
 </example>
 
-
 <examples>
   <example>
     <user_query>Can you help me create a JavaScript function to calculate the factorial of a number?</user_query>
@@ -499,10 +507,12 @@ Here are some examples of correct usage of artifacts:
       You can now view the bouncing ball animation in the preview. The ball will start falling from the top of the screen and bounce realistically when it hits the bottom.
     </assistant_response>
   </example>
-</examples>`
-    ;
+</examples>`;
 };
 
+/**
+ * Prompt pour demander à l'IA de continuer sa réponse précédente
+ */
 export const CONTINUE_PROMPT = stripIndents`
   Continue your prior response. IMPORTANT: Immediately begin from where you left off without any interruptions.
   Do not repeat any content, including artifact and action tags.
