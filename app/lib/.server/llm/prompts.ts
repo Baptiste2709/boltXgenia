@@ -172,9 +172,9 @@ export const getSystemPrompt = (cwd: string = WORK_DIR, branding: BrandingInfo |
 </message_formatting_info>
 
 ${brandContext ? `
-  <brand_style_guide>
+  <branding_instructions>
     ${brandContext.replace(/`/g, "'")}
-  </brand_style_guide>
+  </branding_instructions>
   ` : ''}
 
 <diff_spec>
