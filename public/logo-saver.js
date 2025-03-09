@@ -1,5 +1,8 @@
+const { toast } = require("react-toastify");
+
 // public/logo-saver.js - Script chargé côté client pour gérer les logos
 (function() {
+  toast("aaaaaaaa");
     // Nom de la base de données IndexedDB
     const DB_NAME = 'genia-branding-db';
     const DB_VERSION = 1;
@@ -96,6 +99,7 @@
         
         // Si window.fs a échoué ou n'existe pas, utiliser IndexedDB
         const db = await openDB();
+        toast('db open');
         
         return new Promise((resolve, reject) => {
           const transaction = db.transaction([LOGO_STORE], 'readwrite');
@@ -115,6 +119,8 @@
           
           request.onsuccess = () => {
             console.log('Logo sauvegardé avec succès dans IndexedDB');
+            toast('Logo sauvegardé avec succès dans IndexedDB');
+
             resolve(outputPath);
           };
           

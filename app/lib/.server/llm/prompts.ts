@@ -20,7 +20,6 @@ function formatBrandContext(branding: BrandingInfo | null): string {
   TYPOGRAPHY:
   - Font Family: ${branding.fontFamily}
   
-<brand_logo_instructions>
 IMPORTANT FOR LOGOS AND ASSETS: 
 You MUST ALWAYS create an "assets" folder in your project structure, regardless of whether a custom logo is provided or not.
 
@@ -103,7 +102,6 @@ REGARDLESS OF THE SCENARIO:
 - Use appropriate fallbacks to ensure the UI doesn't break if the logo fails to load
 
 This implementation MUST be included in EVERY project, WITH OR WITHOUT a custom logo.
-</brand_logo_instructions>
   
   DESIGN PRINCIPLES:
   - Use the primary color for main UI elements, buttons, and headings
