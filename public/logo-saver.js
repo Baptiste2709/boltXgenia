@@ -153,13 +153,13 @@
               const logo = cursor.value;
               
               if (logo.path === path) {
-                resolve(logo.dataUrl);
+                // Retourner l'objet logo complet au lieu de juste dataUrl
+                resolve(logo);
                 return;
               }
               
               cursor.continue();
             } else {
-              // Aucun logo correspondant trouvé
               resolve(null);
             }
           };
@@ -167,10 +167,6 @@
           request.onerror = (event) => {
             console.error('Erreur lors de la recherche du logo:', event);
             reject('Erreur lors de la recherche du logo');
-          };
-          
-          transaction.oncomplete = () => {
-            db.close();
           };
         });
       } catch (error) {

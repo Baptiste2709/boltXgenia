@@ -105,15 +105,7 @@ export const BrandingProvider: React.FC<{ children: ReactNode }> = ({ children }
       // Utiliser notre fonction de stockage IndexedDB
       const savedPath = await saveLogoToStorage(logoDataUrl, virtualPath);
       
-      // Déclencher un téléchargement automatique
-      const link = document.createElement('a');
-      link.href = logoDataUrl;
-      link.download = virtualPath.split('/').pop() || 'logo.png';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      
-      toast.success('Logo sauvegardé avec succès et téléchargé pour votre usage local!');
+      toast.success('Logo sauvegardé avec succès');
       
       return savedPath;
     } catch (error) {

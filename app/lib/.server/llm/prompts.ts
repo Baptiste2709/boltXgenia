@@ -34,19 +34,27 @@ TWO SCENARIOS:
    <boltAction type="file" filePath="src/utils/logo-loader.js">
    // Function to load the logo from IndexedDB
    export async function loadLogo(logoPath) {
-     // If window.getLogoByPath is available, use this function to retrieve the logo
-     if (typeof window !== 'undefined' && window.getLogoByPath) {
-       try {
-         const logoData = await window.getLogoByPath(logoPath);
-         return logoData || '/assets/logo.svg'; // Fallback to a default logo
-       } catch (error) {
-         console.error('Error loading logo:', error);
-         return '/assets/logo.svg';
-       }
-     }
-     // If the function is not available, use the direct path
-     return logoPath;
-   }
+  if (typeof window !== 'undefined' && window.getLogoByPath) {
+    try {
+      const logoData = await window.getLogoByPath(logoPath);
+      // Si logoData est un objet avec dataUrl, l'utiliser
+      if (logoData && logoData.dataUrl) {
+        return logoData.dataUrl;
+      }
+      // Si logoData est directement une chaîne (dataUrl)
+      else if (typeof logoData === 'string') {
+        return logoData;
+      }
+      // Sinon, utiliser un logo par défaut
+      return '/assets/logo.svg';
+    } catch (error) {
+      console.error('Error loading logo:', error);
+      return '/assets/logo.svg';
+    }
+  }
+  // Si la fonction n'est pas disponible, utiliser le chemin direct
+  return logoPath;
+}
    </boltAction>
 
    Then, create src/components/Logo.jsx:

@@ -94,32 +94,23 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
     }, [showBrandingForm, branding.logo]);
 
     useEffect(() => {
-      // Charger dynamiquement le script client uniquement
-      const script = document.createElement('script');
-      script.src = '/logo-saver.js';
-      script.async = true;
-      document.body.appendChild(script);
-    
-      return () => {
-        document.body.removeChild(script);
-      };
-    }, []);
-
-    useEffect(() => {
-      updateBranding({ isCustomBranding: false });
-    }, []);
-
-    useEffect(() => {
       // Vérifier si nous sommes côté client
       if (typeof window !== 'undefined') {
-        // Charger dynamiquement le script client uniquement
         const script = document.createElement('script');
-        script.src = '/logo-saver.js'; // Nous créerons ce fichier plus tard
+        script.src = '/logo-saver.js';
         script.async = true;
-        document.body.appendChild(script);
-
+        
+        // Vérifier si le script n'est pas déjà chargé
+        if (!document.querySelector('script[src="/logo-saver.js"]')) {
+          document.body.appendChild(script);
+        }
+    
         return () => {
-          document.body.removeChild(script);
+          // Ne supprimer que si le script existe encore
+          const existingScript = document.querySelector('script[src="/logo-saver.js"]');
+          if (existingScript) {
+            document.body.removeChild(existingScript);
+          }
         };
       }
     }, []);
