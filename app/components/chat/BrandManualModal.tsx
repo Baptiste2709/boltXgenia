@@ -89,8 +89,9 @@ const BrandManualModal: React.FC<BrandManualModalProps> = ({ isOpen, onClose }) 
         });
         
         try {
-          // Utiliser la fonction saveLogo du contexte au lieu de window.saveBrandLogo
+          // Utiliser la fonction saveLogo du contexte
           savedLogoPath = await saveLogo(logoPreview);
+
           
           if (savedLogoPath) {
             console.log("Logo sauvegardé avec succès dans:", savedLogoPath);

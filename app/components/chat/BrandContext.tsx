@@ -102,10 +102,18 @@ export const BrandingProvider: React.FC<{ children: ReactNode }> = ({ children }
       // Chemin virtuel personnalisé pour respecter la structure demandée
       const virtualPath = `/boltXgenia/charte_logos/logo_${Date.now()}.png`;
       
-      // Utiliser notre nouvelle fonction de stockage IndexedDB
+      // Utiliser notre fonction de stockage IndexedDB
       const savedPath = await saveLogoToStorage(logoDataUrl, virtualPath);
       
-      toast.success('Logo sauvegardé avec succès dans le projet!');
+      // Déclencher un téléchargement automatique
+      const link = document.createElement('a');
+      link.href = logoDataUrl;
+      link.download = virtualPath.split('/').pop() || 'logo.png';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      toast.success('Logo sauvegardé avec succès et téléchargé pour votre usage local!');
       
       return savedPath;
     } catch (error) {

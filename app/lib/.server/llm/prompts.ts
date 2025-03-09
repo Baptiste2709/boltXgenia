@@ -2,6 +2,8 @@ import { MODIFICATIONS_TAG_NAME, WORK_DIR } from '~/utils/constants';
 import { allowedHTMLElements } from '~/utils/markdown';
 import { stripIndents } from '~/utils/stripIndent';
 import type { BrandingInfo } from '~/components/chat/BrandContext';
+import { toast } from 'react-toastify';
+
 
 // Function to format the brand context into a string for the prompt
 function formatBrandContext(branding: BrandingInfo | null): string {
@@ -16,11 +18,82 @@ function formatBrandContext(branding: BrandingInfo | null): string {
   TYPOGRAPHY:
   - Font Family: ${branding.fontFamily}
   
-  LOGO:
-  ${branding.logo ? 
-  `- Le logo est disponible dans le chemin "${branding.logo}". Assurez-vous de copier ce fichier dans le projet généré et de l'utiliser avec le chemin relatif approprié.` :
-  '- Logo: Not provided'}
-  Dans le cas ou tu as le logo, crée automatiquement un dossier assets dans le projet et genere juste un fichier logo.svg dedans.
+<brand_logo_instructions>
+IMPORTANT FOR LOGOS AND ASSETS: 
+You MUST ALWAYS create an "assets" folder in your project structure, regardless of whether a custom logo is provided or not.
+
+TWO SCENARIOS:
+
+1. WHEN A LOGO IS PROVIDED in the brand style guide:
+   - The logo is stored in IndexedDB under a virtual path (like /boltXgenia/charte_logos/logo_[timestamp].png)
+   - You MUST implement the following files to fetch and use this logo:
+
+   First, create src/utils/logo-loader.js:
+   <boltAction type="file" filePath="src/utils/logo-loader.js">
+   // Function to load the logo from IndexedDB
+   export async function loadLogo(logoPath) {
+     // If window.getLogoByPath is available, use this function to retrieve the logo
+     if (typeof window !== 'undefined' && window.getLogoByPath) {
+       try {
+         const logoData = await window.getLogoByPath(logoPath);
+         return logoData || '/assets/logo.svg'; // Fallback to a default logo
+       } catch (error) {
+         console.error('Error loading logo:', error);
+         return '/assets/logo.svg';
+       }
+     }
+     // If the function is not available, use the direct path
+     return logoPath;
+   }
+   </boltAction>
+
+   Then, create src/components/Logo.jsx:
+   <boltAction type="file" filePath="src/components/Logo.jsx">
+   import { useState, useEffect } from 'react';
+   import { loadLogo } from '../utils/logo-loader';
+   
+   export default function Logo() {
+     const [logoSrc, setLogoSrc] = useState('/assets/logo.svg');
+     
+     useEffect(() => {
+       async function fetchLogo() {
+         // Use the exact path provided in the brand style guide
+         const logo = await loadLogo('${branding.savedPath}');
+         if (logo) setLogoSrc(logo);
+       }
+       fetchLogo();
+     }, []);
+     
+     return <img src={logoSrc} alt="Logo" className="logo" />;
+   }
+   </boltAction>
+
+2. WHEN NO LOGO IS PROVIDED in the brand style guide:
+   - You MUST generate a simple SVG logo based on the project's purpose and brand colors
+   - Always save this generated logo in the assets folder as "logo.svg"
+   - Use the primary color as the main color for the logo
+
+   Example for generating a logo:
+   <boltAction type="file" filePath="public/assets/logo.svg">
+   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+     <!-- Use the exact primary color from the brand style guide -->
+     <circle cx="50" cy="50" r="45" fill="${branding.primaryColor}" />
+     <!-- Use a contrasting color (typically white) for any text/inner elements -->
+     <text x="50" y="55" font-family="${branding.fontFamily}, sans-serif" font-size="40" text-anchor="middle" fill="#FFFFFF">
+       <!-- Use the first letter of the project name, or a relevant icon -->
+       P
+     </text>
+   </svg>
+   </boltAction>
+
+REGARDLESS OF THE SCENARIO:
+- ALWAYS create the assets folder (either public/assets/ or src/assets/ depending on the project structure)
+- ALWAYS reference the logo in your components (header, navbar, footer, etc.)
+- ALWAYS ensure the logo is properly sized and positioned according to design best practices
+- Use appropriate fallbacks to ensure the UI doesn't break if the logo fails to load
+
+This implementation MUST be included in EVERY project, WITH OR WITHOUT a custom logo.
+</brand_logo_instructions>
   
   DESIGN PRINCIPLES:
   - Use the primary color for main UI elements, buttons, and headings
@@ -29,6 +102,16 @@ function formatBrandContext(branding: BrandingInfo | null): string {
   - Apply the specified font family to all text elements
   - Maintain consistent spacing and layout throughout the application
   - Ensure high contrast between text and background colors for readability
+
+  
+ULTRA IMPORTANT: Every website, application, or UI element MUST STRICTLY adhere to the brand style guide. This means:
+  - Using the **exact** colors specified for backgrounds, text, buttons, and UI elements.
+  - Applying the given typography **for all text** (headings, paragraphs, buttons, etc.).
+  - Respecting the layout, spacing, and design principles provided.
+  - Ensuring **visual consistency** across all generated content.
+  - Never substituting or ignoring any element of the branding.
+
+Failure to apply these rules is **not acceptable**. All output **must** follow the defined brand identity without exception.
   `;
 }
 
@@ -65,10 +148,6 @@ export const getSystemPrompt = (cwd: string = WORK_DIR, branding: BrandingInfo |
   Available shell commands: cat, chmod, cp, echo, hostname, kill, ln, ls, mkdir, mv, ps, pwd, rm, rmdir, xxd, alias, cd, clear, curl, env, false, getconf, head, sort, tail, touch, true, uptime, which, code, jq, loadenv, node, python3, wasm, xdg-open, command, exit, export, source
 </system_constraints>
 
-<custom_branding_requirement>
-  CRITICAL: If custom branding information has been provided through the branding_instructions section, you MUST ALWAYS use it for ANY web project you generate, even if the user doesn't explicitly mention branding in their request. This is a system-level requirement that overrides any other styling considerations.
-</custom_branding_requirement>
-
 <code_formatting_info>
   Use 2 spaces for code indentation
 </code_formatting_info>
@@ -82,17 +161,6 @@ ${brandContext ? `
     ${brandContext.replace(/`/g, "'")}
   </brand_style_guide>
   ` : ''}
-
-ULTRA IMPORTANT: Every website, application, or UI element MUST STRICTLY adhere to the brand style guide. This means:
-  - Using the **exact** colors specified for backgrounds, text, buttons, and UI elements.
-  - Applying the given typography **for all text** (headings, paragraphs, buttons, etc.).
-  - Respecting the layout, spacing, and design principles provided.
-  - Ensuring **visual consistency** across all generated content.
-  - Never substituting or ignoring any element of the branding.
-  - For the logo, you must always create an assets folder in the project directory. Always add a logo.svg in it, to counter potentiel issues importing the logo.
-
-Failure to apply these rules is **not acceptable**. All output **must** follow the defined brand identity without exception.
-
 
 <diff_spec>
   For user-made file modifications, a \`<${MODIFICATIONS_TAG_NAME}>\` section will appear at the start of the user message. It will contain either \`<diff>\` or \`<file>\` elements for each modified file:
@@ -207,6 +275,7 @@ Failure to apply these rules is **not acceptable**. All output **must** follow t
       - The specified typography for all text elements
       - The correct spacing and layout parameters
       - Any brand-specific design patterns mentioned
+      - Logo guide provided
       If no brand style guide is provided, use clean, modern design principles with a focus on usability.
   </artifact_instructions>
 </artifact_info>
@@ -431,7 +500,7 @@ Here are some examples of correct usage of artifacts:
     </assistant_response>
   </example>
 </examples>`
-;
+    ;
 };
 
 export const CONTINUE_PROMPT = stripIndents`

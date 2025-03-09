@@ -4,6 +4,8 @@
 /**
  * Constantes pour la configuration IndexedDB
  */
+import { toast } from 'react-toastify';
+
 const DB_NAME = 'genia-branding-db';
 const DB_VERSION = 1;
 const LOGO_STORE = 'logos';
@@ -98,10 +100,10 @@ export async function saveLogo(logoDataUrl: string, customPath?: string): Promis
       filename,
       timestamp: Date.now()
     };
+
     
     // Ouvrir la base et stocker le logo
     const db = await openDB();
-    
     return new Promise((resolve, reject) => {
       const transaction = db.transaction([LOGO_STORE], 'readwrite');
       const store = transaction.objectStore(LOGO_STORE);
