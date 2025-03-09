@@ -16,19 +16,6 @@ import BrandManualModal from '~/components/chat/BrandManualModal';
 
 import styles from './BaseChat.module.scss';
 
-// Types étendus pour window
-declare global {
-  interface Window {
-    fs?: {
-      mkdir: (path: string, options?: { recursive?: boolean }) => Promise<void>;
-      writeFile: (path: string, data: Uint8Array) => Promise<void>;
-      stat: (path: string) => Promise<any>;
-    };
-    saveBrandLogo?: (imageUrl: string, savePath?: string) => Promise<string | null>;
-    systemPrompt?: string;
-  }
-}
-
 interface BaseChatProps {
   textareaRef?: React.RefObject<HTMLTextAreaElement> | undefined;
   messageRef?: RefCallback<HTMLDivElement> | undefined;
@@ -105,6 +92,18 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
         }
       }
     }, [showBrandingForm, branding.logo]);
+
+    useEffect(() => {
+      // Charger dynamiquement le script client uniquement
+      const script = document.createElement('script');
+      script.src = '/logo-saver.js';
+      script.async = true;
+      document.body.appendChild(script);
+    
+      return () => {
+        document.body.removeChild(script);
+      };
+    }, []);
 
     useEffect(() => {
       updateBranding({ isCustomBranding: false });

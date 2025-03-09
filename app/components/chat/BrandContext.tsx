@@ -1,11 +1,6 @@
 import { toast } from 'react-toastify';
 import React, { createContext, useContext, useState, type ReactNode, useEffect } from 'react';
-
-// Type pour le résultat de la sauvegarde du logo
-interface LogoSaveResult {
-  url: string;
-  path: string;
-}
+import { saveLogo as saveLogoToStorage, getLogoByPath } from '~/utils/logo-storage';
 
 // Interface pour les informations de la charte graphique
 export interface BrandingInfo {
@@ -25,119 +20,12 @@ const defaultBranding: BrandingInfo = {
   primaryColor: '#3B82F6',
   secondaryColor: '#10B981',
   accentColor: '#F59E0B',
-  fontFamily: 'inter',
+  fontFamily: 'Inter',
   isCustomBranding: false,
 };
 
 // Clé localStorage
 const STORAGE_KEY = 'genia-branding-info';
-
-// Fonction utilitaire pour sauvegarder un logo
-export async function saveBrandLogo(logoDataUrl: string) {
-  console.log("Tentative de sauvegarde du logo");
-  
-  // Déterminer le type de fichier et l'extension à partir de la Data URL
-  const getFileInfo = (dataUrl: string) => {
-    const matches = dataUrl.match(/^data:([A-Za-z-+/]+);base64,(.+)$/);
-    if (!matches || matches.length !== 3) {
-      return { mimeType: 'image/png', extension: 'png', isValid: false };
-    }
-    
-    const mimeType = matches[1];
-    let extension = 'png'; // Par défaut
-    
-    if (mimeType.includes('svg')) extension = 'svg';
-    else if (mimeType.includes('jpeg') || mimeType.includes('jpg')) extension = 'jpg';
-    
-    return { mimeType, extension, isValid: true };
-  };
-  
-  // Essayer d'abord d'utiliser window.fs si disponible
-  if (typeof window !== 'undefined' && window.fs) {
-    try {
-      // Créer le dossier assets s'il n'existe pas
-      const logoDir = '/home/project/assets';
-      
-      try {
-        await window.fs.mkdir(logoDir, { recursive: true });
-        console.log("Dossier créé ou existant:", logoDir);
-      } catch (dirError) {
-        console.error("Erreur lors de la création du dossier:", dirError);
-      }
-      
-      // Obtenir les informations du fichier
-      const { extension, isValid } = getFileInfo(logoDataUrl);
-      
-      if (!isValid) {
-        console.warn("Format de Data URL invalide");
-        // Si le format est invalide, on continue quand même avec l'extension par défaut
-      }
-      
-      // Chemin du fichier
-      const logoPath = `${logoDir}/logo.${extension}`;
-      
-      // Traiter la Data URL
-      try {
-        const response = await fetch(logoDataUrl);
-        const blob = await response.blob();
-        const arrayBuffer = await blob.arrayBuffer();
-        const uint8Array = new Uint8Array(arrayBuffer);
-        
-        // Écrire le fichier
-        await window.fs.writeFile(logoPath, uint8Array);
-        console.log("Logo sauvegardé avec succès à:", logoPath);
-        
-        // Notifier l'utilisateur
-        toast.success("Logo sauvegardé avec succès dans le projet");
-        
-        return logoPath;
-      } catch (error) {
-        console.error("Erreur lors du traitement ou de l'écriture du fichier:", error);
-        // Si l'écriture échoue, on tombe sur la solution de téléchargement
-      }
-    } catch (error) {
-      console.error("Erreur lors de la sauvegarde via window.fs:", error);
-      // Si toute tentative window.fs échoue, on tombe sur la solution de téléchargement
-    }
-  }
-  
-  // Méthode alternative: téléchargement direct côté client
-  try {
-    console.log("Utilisation de la méthode de téléchargement direct");
-    
-    const { extension } = getFileInfo(logoDataUrl);
-    const filename = `logo.${extension}`;
-    
-    // Créer un élément a pour le téléchargement
-    const downloadLink = document.createElement('a');
-    downloadLink.href = logoDataUrl;
-    downloadLink.download = filename;
-    downloadLink.target = '_blank';
-    
-    // Ajouter temporairement au DOM et simuler un clic
-    document.body.appendChild(downloadLink);
-    downloadLink.click();
-    document.body.removeChild(downloadLink);
-    
-    // Notifier l'utilisateur
-    toast.info(`Le logo a été téléchargé sous le nom "${filename}"`);
-    toast.info("Assurez-vous de placer ce fichier dans un dossier 'assets' de votre projet");
-    
-    // Pour les besoins de l'application, on considère que le chemin serait
-    const virtualPath = `/home/project/assets/${filename}`;
-    
-    // Retourner l'URL pour une utilisation en mémoire + chemin virtuel pour référence
-    return {
-      url: logoDataUrl,
-      path: virtualPath
-    };
-  } catch (downloadError) {
-    console.error("Erreur lors du téléchargement:", downloadError);
-    
-    // En dernier recours, retourner simplement l'URL
-    return logoDataUrl;
-  }
-}
 
 // Créer le contexte
 interface BrandingContextType {
@@ -171,6 +59,26 @@ export const BrandingProvider: React.FC<{ children: ReactNode }> = ({ children }
 
   const [branding, setBranding] = useState<BrandingInfo>(loadInitialState);
 
+  // Restaurer le logo depuis IndexedDB au chargement si nécessaire
+  useEffect(() => {
+    const loadLogoFromStorage = async () => {
+      // Si nous avons un chemin sauvegardé mais pas de logo en mémoire
+      if (branding.savedPath && !branding.logo) {
+        try {
+          const logoData = await getLogoByPath(branding.savedPath);
+          if (logoData) {
+            // Mise à jour silencieuse du logo sans modifier le localStorage
+            setBranding(prev => ({ ...prev, logo: logoData.dataUrl }));
+          }
+        } catch (error) {
+          console.error('Erreur lors du chargement du logo depuis IndexedDB:', error);
+        }
+      }
+    };
+    
+    loadLogoFromStorage();
+  }, [branding.savedPath]);
+
   // Sauvegarder dans localStorage à chaque mise à jour
   useEffect(() => {
     try {
@@ -189,16 +97,23 @@ export const BrandingProvider: React.FC<{ children: ReactNode }> = ({ children }
   };
   
   // Fonction pour sauvegarder le logo
-  const saveLogo = async (logoDataUrl: string) => {
-    const result = await saveBrandLogo(logoDataUrl);
-    
-    // Si le résultat est un objet avec url et path, on extrait le path
-    if (typeof result === 'object' && result !== null && 'path' in result) {
-      return result.path;
+  const saveLogo = async (logoDataUrl: string): Promise<string | null> => {
+    try {
+      // Chemin virtuel personnalisé pour respecter la structure demandée
+      const virtualPath = `/boltXgenia/charte_logos/logo_${Date.now()}.png`;
+      
+      // Utiliser notre nouvelle fonction de stockage IndexedDB
+      const savedPath = await saveLogoToStorage(logoDataUrl, virtualPath);
+      
+      toast.success('Logo sauvegardé avec succès dans le projet!');
+      
+      return savedPath;
+    } catch (error) {
+      console.error('Erreur lors de la sauvegarde du logo:', error);
+      toast.error('Erreur lors de la sauvegarde du logo');
+      
+      return null;
     }
-    
-    // Sinon on retourne directement le résultat (url ou chemin)
-    return result;
   };
 
   return (
