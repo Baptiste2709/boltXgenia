@@ -1,6 +1,6 @@
 // app/components/chat/BaseChat.tsx
 import type { Message } from 'ai';
-import React, { useState, type RefCallback, useRef, useEffect, useCallback } from 'react';
+import React, { useState, type RefCallback, useEffect} from 'react';
 import { ClientOnly } from 'remix-utils/client-only';
 import { Menu } from '~/components/sidebar/Menu.client';
 import { IconButton } from '~/components/ui/IconButton';
