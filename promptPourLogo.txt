@@ -1,0 +1,177 @@
+  IMPORTANT FOR LOGOS AND ASSETS: 
+  You MUST ALWAYS create an "assets" folder in your project structure, regardless of whether a custom logo is provided or not.
+  
+  TWO SCENARIOS:
+  
+  1. WHEN A LOGO IS PROVIDED in the brand style guide:
+     - The logo is stored in IndexedDB under a virtual path (like /boltXgenia/charte_logos/logo_[timestamp].png)
+     - You MUST implement the following files to fetch and use this logo:
+  
+     First, create src/utils/indexeddb-logo-storage.js:
+     <boltAction type="file" filePath="src/utils/indexeddb-logo-storage.js">
+     // Utilitaire pour accéder au logo stocké dans IndexedDB
+const DB_NAME = 'genia-branding-db';
+const DB_VERSION = 1;
+const LOGO_STORE = 'logos';
+
+// Fonction pour ouvrir la base de données
+async function openDB() {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open(DB_NAME, DB_VERSION);
+    
+    request.onerror = (event) => {
+      console.error("Erreur d\'ouverture de la base IndexedDB:", event);
+      reject("Impossible d\'accéder au stockage local");
+    };
+    
+    request.onsuccess = (event) => {
+      resolve(event.target.result);
+    };
+    
+    // Si la base n'existe pas encore, cette fonction sera ignorée
+    request.onupgradeneeded = (event) => {
+      console.warn("La base de données n'existe pas ou nécessite une mise à jour");
+      const db = event.target.result;
+      if (!db.objectStoreNames.contains(LOGO_STORE)) {
+        db.createObjectStore(LOGO_STORE, { keyPath: 'id' });
+      }
+    };
+  });
+}
+
+// Fonction pour récupérer un logo par son chemin
+export async function getLogoByPath(path) {
+  try {
+    const db = await openDB();
+    
+    return new Promise((resolve, reject) => {
+      const transaction = db.transaction([LOGO_STORE], 'readonly');
+      const store = transaction.objectStore(LOGO_STORE);
+      const request = store.openCursor();
+      
+      request.onsuccess = (event) => {
+        const cursor = event.target.result;
+        
+        if (cursor) {
+          const logo = cursor.value;
+          
+          if (logo.path === path) {
+            resolve(logo);
+            return;
+          }
+          
+          cursor.continue();
+        } else {
+          // Aucun logo correspondant trouvé
+          resolve(null);
+        }
+      };
+      
+      request.onerror = (event) => {
+        console.error('Erreur lors de la recherche du logo:', event);
+        reject('Erreur lors de la recherche du logo');
+      };
+      
+      transaction.oncomplete = () => {
+        db.close();
+      };
+    });
+  } catch (error) {
+    console.error('Erreur lors de la récupération du logo:', error);
+    return null;
+  }
+}
+     </boltAction>
+  
+     Then, create src/utils/logo-loader.js:
+     <boltAction type="file" filePath="src/utils/logo-loader.js">
+     // Function to load the logo from IndexedDB
+import { getLogoByPath } from './indexeddb-logo-storage';
+
+export async function loadLogo(logoPath) {
+  try {
+    console.log("Tentative de chargement du logo depuis:", logoPath);
+    
+    // Essayer d'abord avec notre propre fonction
+    const logoData = await getLogoByPath(logoPath);
+    
+    // Si les données du logo sont trouvées
+    if (logoData && logoData.dataUrl) {
+      console.log("Logo trouvé dans IndexedDB");
+      return logoData.dataUrl;
+    }
+    
+    // Fallback: essayer avec window.getLogoByPath si disponible
+    if (typeof window !== 'undefined' && window.getLogoByPath) {
+      try {
+        const backupLogoData = await window.getLogoByPath(logoPath);
+        
+        // Si logoData est un objet avec dataUrl, l'utiliser
+        if (backupLogoData && backupLogoData.dataUrl) {
+          return backupLogoData.dataUrl;
+        }
+        // Si logoData est directement une chaîne (dataUrl)
+        else if (typeof backupLogoData === 'string') {
+          return backupLogoData;
+        }
+      } catch (windowError) {
+        console.error('Error with window.getLogoByPath:', windowError);
+      }
+    }
+    
+    // Sinon, utiliser un logo par défaut
+    console.log("Logo non trouvé, utilisation du logo par défaut");
+    return '/assets/logo.svg';
+  } catch (error) {
+    console.error('Error loading logo:', error);
+    return '/assets/logo.svg';
+  }
+}
+     </boltAction>
+  
+     Then, create src/components/Logo.jsx:
+     <boltAction type="file" filePath="src/components/Logo.jsx">
+     import { useState, useEffect } from 'react';
+     import { loadLogo } from '../utils/logo-loader';
+     
+     export default function Logo() {
+       const [logoSrc, setLogoSrc] = useState('/assets/logo.svg');
+       const [isLoading, setIsLoading] = useState(true);
+       
+       useEffect(() => {
+         async function fetchLogo() {
+           try {
+             setIsLoading(true);
+             // Use the exact path provided in the brand style guide
+             const logo = await loadLogo('${branding.savedPath}');
+             if (logo) setLogoSrc(logo);
+           } catch (error) {
+             console.error("Erreur lors du chargement du logo:", error);
+           } finally {
+             setIsLoading(false);
+           }
+         }
+         fetchLogo();
+       }, []);
+       
+       return (
+         <>
+           {isLoading ? (
+             <div className="logo-placeholder" style={{ width: '100px', height: '50px', background: 'rgba(0,0,0,0.1)' }}></div>
+           ) : (
+             <img src={logoSrc} alt="Logo" className="logo" style={{ maxWidth: '100%', height: 'auto' }} />
+           )}
+         </>
+       );
+     }
+     </boltAction>
+  
+
+  
+  REGARDLESS OF THE SCENARIO:
+  - ALWAYS create the assets folder (either public/assets/ or src/assets/ depending on the project structure)
+  - ALWAYS reference the logo in your components (header, navbar, footer, etc.)
+  - ALWAYS ensure the logo is properly sized and positioned according to design best practices
+  - Use appropriate fallbacks to ensure the UI doesn't break if the logo fails to load
+  
+  This implementation MUST be included in EVERY project, WITH OR WITHOUT a custom logo.

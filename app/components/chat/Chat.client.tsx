@@ -153,24 +153,35 @@ export const ChatImpl = memo(({ initialMessages, storeMessageHistory }: ChatProp
     if (branding.isCustomBranding) {
       // Instructions pour l'IA concernant la charte graphique
       const brandingInstructions = `
-<branding_instructions>
-Utilise la charte graphique suivante pour tous les éléments visuels que tu crées:
-- Couleur principale: ${branding.primaryColor}
-- Couleur secondaire: ${branding.secondaryColor}
-- Couleur d'accent: ${branding.accentColor}
-- Police de caractères: ${branding.fontFamily}
-${branding.logo ? '- Un logo est également fourni et doit être utilisé' : ''}
+  <branding_instructions>
+  COLOR PALETTE :
+   - Couleur Principale : ${branding.primaryColor}
+   - Couleur Secondaire : ${branding.secondaryColor}
+   - Couleur d'Accent : ${branding.accentColor}
 
-Ces couleurs doivent être utilisées de manière cohérente dans tout le contenu que tu génères:
-- La couleur principale pour les éléments dominants (en-têtes, boutons principaux)
-- La couleur secondaire pour les éléments de support (sous-titres, liens)
-- La couleur d'accent pour les mises en évidence (boutons d'appel à l'action, notifications)
+TYPOGRAPHIE :
+   - Famille de Police : ${branding.fontFamily}
 
-Si tu génères du code HTML/CSS/JS, assure-toi d'intégrer ces couleurs et cette police.
-</branding_instructions>
+PRINCIPES DE DESIGN :
+   - Utiliser la couleur principale pour les éléments principaux de l'interface, les boutons et les titres
+   - Utiliser la couleur secondaire pour les éléments de support et les arrière-plans
+   - Utiliser la couleur d'accent avec parcimonie pour les éléments d'appel à l'action ou les mises en évidence
+   - Appliquer la famille de police spécifiée à tous les éléments textuels
+   - Maintenir un espacement et une mise en page cohérents dans toute l'application
+   - Assurer un contraste élevé entre les couleurs de texte et d'arrière-plan pour la lisibilité
 
-${_input}`;
+ULTRA IMPORTANT : Chaque site web, application ou élément d'interface utilisateur DOIT STRICTEMENT respecter le guide de style de la marque. Cela signifie :
+   - Utiliser les couleurs **exactes** spécifiées pour les arrière-plans, le texte, les boutons et les éléments d'interface.
+   - Appliquer la typographie donnée **pour tout le texte** (titres, paragraphes, boutons, etc.).
+   - Respecter la mise en page, l'espacement et les principes de design fournis.
+   - Assurer une **cohérence visuelle** dans tout le contenu généré.
+   - Ne jamais substituer ou ignorer aucun élément de l'identité de marque.
 
+Le non-respect de ces règles n'est **pas acceptable**. Toute production **doit** suivre l'identité de marque définie sans exception.
+  </branding_instructions>
+  
+  ${_input}`;
+  
       return brandingInstructions;
     }
     

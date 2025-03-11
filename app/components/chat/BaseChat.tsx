@@ -9,7 +9,6 @@ import { classNames } from '~/utils/classNames';
 import { Messages } from './Messages.client';
 import { SendButton } from './SendButton.client';
 import { useBranding } from '~/components/chat/BrandContext';
-import { toast } from 'react-toastify';
 import { AnimatePresence } from 'framer-motion';
 import BrandExtractModal from '~/components/chat/BrandExtractModal';
 import BrandManualModal from '~/components/chat/BrandManualModal';
@@ -36,7 +35,7 @@ interface BaseChatProps {
 const EXAMPLE_PROMPTS = [
   { text: 'Développer un site de gestion de projets pour étudiants en React' },
   { text: 'Créer un portfolio interactif avec Three.js' },
-  { text: 'Crée le site vitrine de l\'école ECE, une école d\'ingénieur à Paris avec React' },
+  { text: 'Crée le site vitrine de l\'école ECE, une école d\'ingénieur à Paris avec React et Tailwind' },
   { text: 'Concevoir une application mobile de suivi des habitudes avec React Native' },
 ];
 
