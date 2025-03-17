@@ -13,15 +13,15 @@ export interface BrandingInfo {
   isCustomBranding: boolean;
 }
 
-// Valeurs par défaut
+// Valeurs par défaut avec la nouvelle charte graphique
 const defaultBranding: BrandingInfo = {
   logo: null,
   savedPath: null,
-  primaryColor: '#3B82F6',
-  secondaryColor: '#10B981',
-  accentColor: '#F59E0B',
-  fontFamily: 'Inter',
-  isCustomBranding: false,
+  primaryColor: '#077279', // Deuxième couleur (turquoise)
+  secondaryColor: '#FFFFFF', // Blanc
+  accentColor: '#18B6C3',   // Quatrième couleur (vert-bleu foncé)
+  fontFamily: 'Space Grotesk', // Police Space Grotesk
+  isCustomBranding: true // Activé par défaut
 };
 
 // Clé localStorage

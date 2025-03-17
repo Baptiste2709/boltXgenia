@@ -23,61 +23,7 @@ function formatBrandContext(branding: BrandingInfo | null): string {
 IMPORTANT FOR LOGOS AND ASSETS: 
 You MUST ALWAYS create an "assets" folder in your project structure, regardless of whether a custom logo is provided or not.
 
-TWO SCENARIOS:
-
-1. WHEN A LOGO IS PROVIDED in the brand style guide:
-   - The logo is stored in IndexedDB under a virtual path (like /boltXgenia/charte_logos/logo_[timestamp].png)
-   - You MUST implement the following files to fetch and use this logo:
-
-   First, create src/utils/logo-loader.js:
-   <boltAction type="file" filePath="src/utils/logo-loader.js">
-   // Function to load the logo from IndexedDB
-   export async function loadLogo(logoPath) {
-  if (typeof window !== 'undefined' && window.getLogoByPath) {
-    try {
-      const logoData = await window.getLogoByPath(logoPath);
-      // Si logoData est un objet avec dataUrl, l'utiliser
-      if (logoData && logoData.dataUrl) {
-        return logoData.dataUrl;
-      }
-      // Si logoData est directement une chaîne (dataUrl)
-      else if (typeof logoData === 'string') {
-        return logoData;
-      }
-      // Sinon, utiliser un logo par défaut
-      return '/assets/logo.svg';
-    } catch (error) {
-      console.error('Error loading logo:', error);
-      return '/assets/logo.svg';
-    }
-  }
-  // Si la fonction n'est pas disponible, utiliser le chemin direct
-  return logoPath;
-}
-   </boltAction>
-
-   Then, create src/components/Logo.jsx:
-   <boltAction type="file" filePath="src/components/Logo.jsx">
-   import { useState, useEffect } from 'react';
-   import { loadLogo } from '../utils/logo-loader';
-   
-   export default function Logo() {
-     const [logoSrc, setLogoSrc] = useState('/assets/logo.svg');
-     
-     useEffect(() => {
-       async function fetchLogo() {
-         // Use the exact path provided in the brand style guide
-         const logo = await loadLogo('${branding.savedPath}');
-         if (logo) setLogoSrc(logo);
-       }
-       fetchLogo();
-     }, []);
-     
-     return <img src={logoSrc} alt="Logo" className="logo" />;
-   }
-   </boltAction>
-
-2. WHEN NO LOGO IS PROVIDED in the brand style guide:
+ONE SCENARIO:
    - You MUST generate a simple SVG logo based on the project's purpose and brand colors
    - Always save this generated logo in the assets folder as "logo.svg"
    - Use the primary color as the main color for the logo
@@ -292,6 +238,12 @@ ${brandContext ? `
       - Any brand-specific design patterns mentioned
       - Logo guide provided
       If no brand style guide is provided, use clean, modern design principles with a focus on usability.
+
+      16. ALWAYS incorporate relevant high-quality images from Unsplash into websites and applications. When adding images:
+      - Choose specific dimensions appropriate for each image location (e.g., 1200x600 for banners, 400x300 for cards)
+      - Use descriptive search terms separated by commas (not spaces) that precisely match the content
+      - Always include meaningful alt text for all images
+      - Implement responsive image techniques with proper CSS
   </artifact_instructions>
 </artifact_info>
 

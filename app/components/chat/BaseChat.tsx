@@ -1,6 +1,6 @@
 // app/components/chat/BaseChat.tsx
 import type { Message } from 'ai';
-import React, { useState, type RefCallback, useEffect} from 'react';
+import React, { useState, type RefCallback, useRef, useEffect, useCallback } from 'react';
 import { ClientOnly } from 'remix-utils/client-only';
 import { Menu } from '~/components/sidebar/Menu.client';
 import { IconButton } from '~/components/ui/IconButton';
@@ -35,7 +35,7 @@ interface BaseChatProps {
 const EXAMPLE_PROMPTS = [
   { text: 'Développer un site de gestion de projets pour étudiants en React' },
   { text: 'Créer un portfolio interactif avec Three.js' },
-  { text: 'Crée le site vitrine de l\'école ECE, une école d\'ingénieur à Paris avec React et Tailwind' },
+  { text: 'Crée le site vitrine de l\'école ECE, une école d\'ingénieur à Paris avec React' },
   { text: 'Concevoir une application mobile de suivi des habitudes avec React Native' },
 ];
 

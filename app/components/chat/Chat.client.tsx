@@ -179,6 +179,12 @@ ULTRA IMPORTANT : Chaque site web, application ou élément d'interface utilisat
 
 Le non-respect de ces règles n'est **pas acceptable**. Toute production **doit** suivre l'identité de marque définie sans exception.
   </branding_instructions>
+
+  <images instructions>
+  Incorpore dans tous les cas des images dans le site d'une banque d'images gratuites.
+  Mets les proprement dans le site, qu'elles soient bien inclus de maniere propre et professionnel.
+  Ne parle pas des images dans ta réponse.
+  </images instructions>
   
   ${_input}`;
   
